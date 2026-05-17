@@ -1,0 +1,112 @@
+<div class="sf-page fade-in">
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb sf-breadcrumb mb-1">
+          <li class="breadcrumb-item sf-muted">Home</li>
+          <li class="breadcrumb-item active">My Profile</li>
+        </ol>
+      </nav>
+      <h2 class="sf-page-title"><i class="bi bi-person-circle me-2"></i>My Profile</h2>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-spinner></app-spinner>
+  } @else if (error()) {
+    <div class="alert alert-danger d-flex gap-2 align-items-center py-2 small">
+      <i class="bi bi-exclamation-triangle-fill"></i>{{ error() }}
+    </div>
+  } @else if (profile(); as u) {
+    <div class="row g-4">
+
+      <!-- Avatar card -->
+      <div class="col-lg-4">
+        <div class="sf-card text-center py-4">
+          <div class="sf-avatar mx-auto mb-3"
+               style="width:72px;height:72px;font-size:28px;border-radius:50%;">
+            {{ (u.userName || 'U')[0].toUpperCase() }}
+          </div>
+          <h5 class="fw-bold mb-1">{{ u.userName }}</h5>
+          <span class="sf-chip">
+            <i class="bi {{ roleIcon(u.roleName) }} me-1"></i>{{ u.roleName }}
+          </span>
+          <div class="mt-3">
+            @if (u.status) {
+              <span class="badge rounded-pill px-3 py-2"
+                    style="background:var(--sf-success-bg);color:var(--sf-success);">
+                <i class="bi bi-check-circle me-1"></i>Active
+              </span>
+            } @else {
+              <span class="badge rounded-pill px-3 py-2"
+                    style="background:var(--sf-danger-bg);color:var(--sf-danger);">
+                <i class="bi bi-x-circle me-1"></i>Inactive
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Details card -->
+      <div class="col-lg-8">
+        <div class="sf-card">
+          <div class="sf-card-title mb-4"><i class="bi bi-info-circle me-2"></i>Account Details</div>
+
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="sf-muted small fw-semibold text-uppercase" style="letter-spacing:.05em;">Full Name</label>
+              <div class="mt-1 fw-semibold">{{ u.userName }}</div>
+            </div>
+
+            <div class="col-sm-6">
+              <label class="sf-muted small fw-semibold text-uppercase" style="letter-spacing:.05em;">Role</label>
+              <div class="mt-1">
+                <span class="sf-chip">
+                  <i class="bi {{ roleIcon(u.roleName) }} me-1"></i>{{ u.roleName }}
+                </span>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <label class="sf-muted small fw-semibold text-uppercase" style="letter-spacing:.05em;">Email</label>
+              <div class="mt-1">
+                <i class="bi bi-envelope me-1 sf-muted"></i>{{ u.email }}
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <label class="sf-muted small fw-semibold text-uppercase" style="letter-spacing:.05em;">Phone</label>
+              <div class="mt-1">
+                <i class="bi bi-telephone me-1 sf-muted"></i>{{ u.phone || '—' }}
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <label class="sf-muted small fw-semibold text-uppercase" style="letter-spacing:.05em;">User ID</label>
+              <div class="mt-1 sf-muted">#{{ u.userID }}</div>
+            </div>
+
+            <div class="col-sm-6">
+              <label class="sf-muted small fw-semibold text-uppercase" style="letter-spacing:.05em;">Status</label>
+              <div class="mt-1">
+                @if (u.status) {
+                  <span style="color:var(--sf-success);"><i class="bi bi-check-circle me-1"></i>Active</span>
+                } @else {
+                  <span style="color:var(--sf-danger);"><i class="bi bi-x-circle me-1"></i>Inactive</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <hr style="border-color:var(--sf-border);" class="my-4">
+
+          <div class="d-flex align-items-center gap-2 sf-muted small">
+            <i class="bi bi-lock"></i>
+            To update your profile details, contact your Administrator.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

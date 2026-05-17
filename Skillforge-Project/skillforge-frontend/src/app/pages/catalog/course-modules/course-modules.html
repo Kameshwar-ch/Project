@@ -1,0 +1,148 @@
+<div class="sf-page fade-in">
+
+  <!-- Header -->
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb sf-breadcrumb mb-1">
+          <li class="breadcrumb-item sf-muted">Home</li>
+          <li class="breadcrumb-item">
+            <a routerLink="/catalog" class="sf-link">Training Catalog</a>
+          </li>
+          <li class="breadcrumb-item active">{{ course()?.title ?? 'Modules' }}</li>
+        </ol>
+      </nav>
+      <h2 class="sf-page-title">{{ course()?.title ?? 'Course Modules' }}</h2>
+    </div>
+    <button class="sf-btn-ghost" type="button" (click)="back()">
+      <i class="bi bi-arrow-left me-1"></i>Back to Catalog
+    </button>
+  </div>
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+      <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+      {{ toast() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <app-spinner></app-spinner>
+  } @else {
+
+    <!-- Course completed banner -->
+    @if (courseCompleted()) {
+      <div class="sf-card mb-3 d-flex align-items-center gap-3"
+        style="background:linear-gradient(135deg,#d4edda,#c3e6cb);border:1px solid #b8dacc;">
+        <i class="bi bi-award-fill" style="font-size:2rem;color:#1a7a3e;"></i>
+        <div>
+          <div class="fw-bold fs-6" style="color:#1a7a3e;">Course Completed!</div>
+          <div class="sf-muted small" style="color:#155724;">
+            All modules are done. Head to
+            <a routerLink="/enrollment" class="fw-semibold" style="color:#155724;">Enrollment & Attendance</a>
+            to download your certificate.
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Progress bar -->
+    @if (modules().length > 0) {
+      <div class="sf-card mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-semibold"><i class="bi bi-bar-chart-fill me-2" style="color:var(--sf-primary);"></i>Your Progress</span>
+          @if (progressLoading()) {
+            <span class="sf-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Loading…</span>
+          } @else {
+            <span class="fw-bold" style="color:var(--sf-primary);">{{ progressPct }}%</span>
+          }
+        </div>
+        <div class="progress mb-1" style="height:10px;border-radius:6px;">
+          <div class="progress-bar" role="progressbar"
+            [style.width]="progressPct + '%'"
+            style="background:var(--sf-primary);transition:width 0.4s;">
+          </div>
+        </div>
+        <div class="sf-muted small">
+          {{ completed().size }} of {{ modules().length }} module{{ modules().length !== 1 ? 's' : '' }} completed
+        </div>
+      </div>
+    }
+
+    <!-- Modules list -->
+    <div class="sf-card">
+      <div class="sf-card-title mb-3">
+        <i class="bi bi-collection-play me-2"></i>Course Modules
+      </div>
+
+      @if (modules().length === 0) {
+        <div class="text-center py-5 sf-muted">
+          <i class="bi bi-collection fs-2 d-block mb-2"></i>
+          No modules have been added to this course yet.
+        </div>
+      } @else {
+        <div class="d-flex flex-column gap-2">
+          @for (m of modules(); track m.moduleID; let i = $index) {
+            <div class="d-flex align-items-center gap-3 p-3 rounded sf-table-row"
+              style="border:1px solid var(--sf-border);cursor:pointer;transition:box-shadow 0.15s;"
+              (click)="openModule(m)"
+              [style.opacity]="isCompleted(m.moduleID) ? '0.8' : '1'">
+
+              <!-- Number / check -->
+              <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                style="width:40px;height:40px;font-weight:700;font-size:1rem;"
+                [style.background]="isCompleted(m.moduleID) ? 'var(--sf-success,#28a745)' : 'var(--sf-primary)'"
+                style="color:#fff;">
+                @if (isCompleted(m.moduleID)) {
+                  <i class="bi bi-check-lg"></i>
+                } @else {
+                  {{ i + 1 }}
+                }
+              </div>
+
+              <!-- Info -->
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-semibold" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  {{ m.title }}
+                </div>
+                <div class="sf-muted small" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  {{ m.contentURI || 'No description' }}
+                </div>
+              </div>
+
+              <!-- Duration -->
+              <div class="sf-muted small flex-shrink-0 text-end" style="min-width:60px;">
+                <i class="bi bi-clock me-1"></i>{{ m.duration }}h
+              </div>
+
+              <!-- Status / Action -->
+              <div class="flex-shrink-0" (click)="$event.stopPropagation()">
+                @if (isCompleted(m.moduleID)) {
+                  <span class="badge" style="background:var(--sf-success,#28a745);">
+                    <i class="bi bi-check-lg me-1"></i>Done
+                  </span>
+                } @else if (!courseCompleted()) {
+                  <button class="sf-btn-sm sf-btn-sm-primary"
+                    type="button"
+                    [disabled]="markingId() === m.moduleID"
+                    (click)="markComplete(m.moduleID)">
+                    @if (markingId() === m.moduleID) {
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                    } @else {
+                      <i class="bi bi-check2 me-1"></i>
+                    }Mark Done
+                  </button>
+                }
+              </div>
+
+              <!-- Chevron -->
+              <i class="bi bi-chevron-right sf-muted flex-shrink-0"></i>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  }
+</div>

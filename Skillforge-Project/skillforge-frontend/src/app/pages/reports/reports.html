@@ -1,0 +1,323 @@
+<div class="sf-page fade-in">
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb sf-breadcrumb mb-1">
+        <li class="breadcrumb-item sf-muted">Home</li>
+        <li class="breadcrumb-item active">Reports & Analytics</li>
+      </ol></nav>
+      <h2 class="sf-page-title">Reports & Analytics</h2>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="sf-toast fade-in"
+         [class.sf-toast-error]="toastType() === 'error'"
+         [style.border-left-color]="toastType() === 'success' ? 'var(--sf-success)' : toastType() === 'error' ? 'var(--sf-danger)' : 'var(--sf-primary)'">
+      <i class="bi me-2"
+         [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : toastType() === 'error' ? 'bi-exclamation-triangle-fill' : 'bi-hourglass-split'"></i>
+      {{ toast() }}
+    </div>
+  }
+
+
+  <!-- Generate Report -->
+  <div class="sf-card mb-3">
+    <div class="sf-card-title mb-3"><i class="bi bi-play-circle me-2"></i>Generate Ad-hoc Report</div>
+    <div class="d-flex flex-wrap gap-2 align-items-end">
+      <div>
+        <label class="sf-label mb-1">Scope</label>
+        <select class="sf-select" [ngModel]="scope()" (ngModelChange)="scope.set($event)">
+          <option>Course</option>
+          <option>Employee</option>
+          <option>Department</option>
+        </select>
+      </div>
+      <button class="sf-btn-primary" type="button" (click)="generate()" [disabled]="generating()">
+        @if (generating()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>Generating…
+        } @else {
+          <i class="bi bi-play-fill me-1"></i>Generate & Download PDF
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Report Schedules (Admin only) -->
+  @if (isAdmin) {
+  <div class="sf-card">
+    <div class="sf-card-title d-flex justify-content-between align-items-center mb-3">
+      <span><i class="bi bi-clock-history me-2"></i>Report Schedules</span>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        @if (activeCount > 0) {
+          <span class="sf-chip" style="border-color:var(--sf-success);color:var(--sf-success);">
+            <i class="bi bi-circle-fill" style="font-size:7px;"></i> {{ activeCount }} active
+          </span>
+        }
+        @if (inactiveCount > 0) {
+          <span class="sf-chip">{{ inactiveCount }} inactive</span>
+        }
+        <button class="sf-btn-sm" type="button" (click)="loadSchedules()" title="Refresh">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <button class="sf-btn-primary" type="button" (click)="openScheduleModal()">
+          <i class="bi bi-plus-lg me-1"></i>New Schedule
+        </button>
+      </div>
+    </div>
+
+    @if (schedulesLoading()) {
+      <app-spinner></app-spinner>
+    } @else if (schedulesError()) {
+      <div class="alert alert-danger d-flex gap-2 align-items-center py-2 small">
+        <i class="bi bi-exclamation-triangle-fill"></i>{{ schedulesError() }}
+      </div>
+    } @else if (schedules().length === 0) {
+      <div class="text-center py-4 sf-muted">
+        <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
+        No report schedules found.
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table sf-table mb-0">
+          <thead>
+            <tr>
+              <th>ID</th><th>Scope</th><th>Cron Expression</th>
+              <th>Next Run</th><th>Created</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of schedules(); track s.scheduleID) {
+              <tr class="sf-table-row">
+                <td class="sf-muted">#{{ s.scheduleID }}</td>
+                <td class="fw-semibold">{{ s.scope }}</td>
+                <td>
+                  <code class="sf-chip" style="font-family:monospace;font-size:12px;">{{ s.cronExpression }}</code>
+                </td>
+                <td class="sf-muted" style="font-size:13px;">
+                  {{ s.isActive && s.nextRun ? (s.nextRun | date:'MMM d, HH:mm') : '—' }}
+                </td>
+                <td class="sf-muted" style="font-size:13px;">{{ s.createdAt | date:'MMM d, yyyy' }}</td>
+                <td>
+                  @if (s.isActive) {
+                    <span class="badge rounded-pill" style="background:rgba(34,197,94,.15);color:var(--sf-success);">
+                      <i class="bi bi-circle-fill me-1" style="font-size:7px;"></i>Active
+                    </span>
+                  } @else {
+                    <span class="badge rounded-pill bg-secondary-subtle text-secondary">Inactive</span>
+                  }
+                </td>
+                <td>
+                  @if (s.isActive) {
+                    <button class="sf-btn-sm"
+                            style="color:var(--sf-danger);border-color:rgba(239,68,68,.3);"
+                            type="button"
+                            [disabled]="deactivatingId() === s.scheduleID"
+                            (click)="deactivate(s.scheduleID)">
+                      @if (deactivatingId() === s.scheduleID) {
+                        <span class="spinner-border spinner-border-sm"></span>
+                      } @else {
+                        <i class="bi bi-pause-circle me-1"></i>Deactivate
+                      }
+                    </button>
+                  } @else {
+                    <span class="sf-muted" style="font-size:12px;">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="sf-muted small mt-2 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Deactivated schedules are preserved for audit. The background service only runs <strong>active</strong> schedules.
+      </p>
+    }
+  </div>
+  } <!-- /isAdmin -->
+</div>
+
+<!-- ═══════════════ Deactivate Confirmation Modal ═══════════════ -->
+@if (showDeactivateModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="cancelDeactivate()">
+  <div class="sf-modal" style="max-width:420px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-pause-circle me-2 text-danger"></i>Deactivate Schedule</h5>
+      <button class="sf-btn-ghost" type="button" (click)="cancelDeactivate()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="sf-modal-body">
+      <p class="mb-1">Are you sure you want to deactivate schedule <strong>{{ pendingDeactivateId() }}</strong>?</p>
+      <p class="sf-muted small mb-4">No further reports will be auto-generated from this schedule. The schedule is preserved for audit and can be reviewed in the table.</p>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="cancelDeactivate()">Cancel</button>
+        <button type="button" class="sf-btn-primary" style="background:var(--sf-danger);border-color:var(--sf-danger);"
+                (click)="confirmDeactivate()">
+          <i class="bi bi-pause-circle me-1"></i>Yes, Deactivate
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ═══════════════ Create Schedule Modal ═══════════════ -->
+@if (showScheduleModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeScheduleModal()">
+  <div class="sf-modal" (click)="$event.stopPropagation()">
+
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-calendar-plus me-2"></i>New Report Schedule</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeScheduleModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="sf-modal-body">
+
+      <!-- Scope -->
+      <div class="mb-3">
+        <label class="sf-label">Scope</label>
+        <select class="sf-select w-100 mt-1" [(ngModel)]="form.scope">
+          <option value="Course">Course</option>
+          <option value="Employee">Employee</option>
+          <option value="Department">Department</option>
+        </select>
+      </div>
+
+      <!-- Frequency -->
+      <div class="mb-3">
+        <label class="sf-label">Frequency</label>
+        <select class="sf-select w-100 mt-1" [(ngModel)]="form.frequency" (ngModelChange)="onSelectChange()">
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="custom">Custom (enter cron manually)</option>
+        </select>
+      </div>
+
+      <!-- Time picker (daily / weekly / monthly) -->
+      @if (form.frequency === 'daily' || form.frequency === 'weekly' || form.frequency === 'monthly') {
+        <div class="row g-2 mb-3">
+          <div class="col">
+            <label class="sf-label">Hour</label>
+            <select class="sf-select w-100 mt-1" [(ngModel)]="form.hour" (ngModelChange)="onSelectChange()">
+              @for (h of hours; track h) {
+                <option [value]="h">{{ pad2(h) }}:00</option>
+              }
+            </select>
+          </div>
+          <div class="col">
+            <label class="sf-label">Minute</label>
+            <select class="sf-select w-100 mt-1" [(ngModel)]="form.minute" (ngModelChange)="onSelectChange()">
+              @for (m of minutes; track m) {
+                <option [value]="m">:{{ pad2(m) }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      }
+
+      <!-- Minute only (hourly) -->
+      @if (form.frequency === 'hourly') {
+        <div class="mb-3">
+          <label class="sf-label">At minute</label>
+          <select class="sf-select w-100 mt-1" [(ngModel)]="form.minute" (ngModelChange)="onSelectChange()">
+            @for (m of minutes; track m) {
+              <option [value]="m">:{{ pad2(m) }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Day of week (weekly) -->
+      @if (form.frequency === 'weekly') {
+        <div class="mb-3">
+          <label class="sf-label">Day of week</label>
+          <select class="sf-select w-100 mt-1" [(ngModel)]="form.dayOfWeek" (ngModelChange)="onSelectChange()">
+            @for (d of dayNames; track $index) {
+              <option [value]="$index">{{ d }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Day of month (monthly) -->
+      @if (form.frequency === 'monthly') {
+        <div class="mb-3">
+          <label class="sf-label">Day of month</label>
+          <select class="sf-select w-100 mt-1" [(ngModel)]="form.dayOfMonth" (ngModelChange)="onSelectChange()">
+            @for (d of days; track d) {
+              <option [value]="d">{{ d }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Cron expression (always editable) -->
+      <div class="mb-2">
+        <label class="sf-label">
+          Cron Expression
+          <span class="sf-muted small ms-1" style="font-weight:400;">(minute hour day month weekday)</span>
+        </label>
+        <input class="sf-input w-100 mt-1" type="text" placeholder="e.g. 0 9 * * 1"
+               [(ngModel)]="form.cronExpression"
+               (ngModelChange)="onCronChange()"
+               style="font-family:monospace;letter-spacing:.04em;" />
+      </div>
+
+      <!-- Human-readable description -->
+      <div class="d-flex align-items-center gap-2 p-2 rounded mb-3"
+           style="background:rgba(99,102,241,.08);font-size:13px;">
+        <i class="bi bi-calendar-check sf-muted"></i>
+        <span>{{ cronDescription }}</span>
+      </div>
+
+      <!-- Quick preset chips -->
+      <div class="mb-3">
+        <div class="sf-label mb-1">Quick presets</div>
+        <div class="d-flex flex-wrap gap-1">
+          <button type="button" class="sf-chip" style="cursor:pointer;"
+                  (click)="form.cronExpression='0 * * * *'; form.frequency='hourly'; form.minute=0; onCronChange()">
+            Hourly
+          </button>
+          <button type="button" class="sf-chip" style="cursor:pointer;"
+                  (click)="form.cronExpression='0 9 * * *'; form.frequency='daily'; form.hour=9; form.minute=0; onCronChange()">
+            Daily 09:00
+          </button>
+          <button type="button" class="sf-chip" style="cursor:pointer;"
+                  (click)="form.cronExpression='0 9 * * 1'; form.frequency='weekly'; form.hour=9; form.minute=0; form.dayOfWeek=1; onCronChange()">
+            Every Monday
+          </button>
+          <button type="button" class="sf-chip" style="cursor:pointer;"
+                  (click)="form.cronExpression='0 9 1 * *'; form.frequency='monthly'; form.hour=9; form.minute=0; form.dayOfMonth=1; onCronChange()">
+            1st of Month
+          </button>
+          <button type="button" class="sf-chip" style="cursor:pointer;"
+                  (click)="form.cronExpression='0 9 * * 1-5'; form.frequency='custom'; onCronChange()">
+            Weekdays 09:00
+          </button>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeScheduleModal()">Cancel</button>
+        <button type="button" class="sf-btn-primary"
+                (click)="submitSchedule()"
+                [disabled]="scheduleLoading() || !form.cronExpression.trim()">
+          @if (scheduleLoading()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>Creating…
+          } @else {
+            <i class="bi bi-calendar-check me-1"></i>Create Schedule
+          }
+        </button>
+      </div>
+
+    </div><!-- /sf-modal-body -->
+  </div>
+</div>
+}

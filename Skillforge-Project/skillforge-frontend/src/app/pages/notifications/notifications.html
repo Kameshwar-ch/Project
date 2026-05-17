@@ -1,0 +1,160 @@
+<div class="sf-page fade-in">
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb sf-breadcrumb mb-1">
+        <li class="breadcrumb-item sf-muted">Home</li>
+        <li class="breadcrumb-item active">Notifications</li>
+      </ol></nav>
+      <h2 class="sf-page-title">
+        Notifications
+        @if (unreadCount > 0) {
+          <span class="badge rounded-pill ms-2"
+                style="background:var(--sf-primary);color:#001018;font-size:13px;">
+            {{ unreadCount }}
+          </span>
+        }
+      </h2>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="sf-toast fade-in">
+      <i class="bi bi-check-circle-fill me-2" style="color:var(--sf-success);"></i>
+      {{ toast() }}
+    </div>
+  }
+
+  <div class="row g-3">
+    <!-- Inbox -->
+    <div class="col-md-8">
+      <div class="sf-card">
+        <!-- Header row with filter mode dropdown -->
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <div class="sf-card-title"><i class="bi bi-inbox me-2"></i>Inbox</div>
+
+          <div class="d-flex align-items-center gap-2">
+            <span class="sf-muted small">Filter by</span>
+            <div class="dropdown">
+              <button class="sf-btn-ghost dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi me-1"
+                   [ngClass]="filterMode() === 'Category' ? 'bi-tag' : 'bi-funnel'"></i>
+                {{ filterMode() }}
+              </button>
+              <ul class="dropdown-menu sf-dropdown-menu">
+                @for (mode of filterModes; track mode) {
+                  <li>
+                    <button class="dropdown-item d-flex align-items-center gap-2"
+                            type="button"
+                            [class.active]="filterMode() === mode"
+                            (click)="onFilterModeChange(mode)">
+                      <i class="bi" [ngClass]="mode === 'Category' ? 'bi-tag' : 'bi-funnel'"></i>
+                      {{ mode }}
+                      @if (filterMode() === mode) {
+                        <i class="bi bi-check ms-auto"></i>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category filter chips -->
+        @if (filterMode() === 'Category') {
+          <div class="sf-notif-filter-bar mb-3">
+            @for (cat of categories; track cat) {
+              <button class="sf-filter-chip"
+                      type="button"
+                      [class.active]="activeCategory() === cat"
+                      (click)="selectCategory(cat)">
+                <i class="bi {{ categoryIcon(cat) }}"></i>
+                {{ cat }}
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Status filter chips -->
+        @if (filterMode() === 'Status') {
+          <div class="sf-notif-filter-bar status mb-3">
+            @for (s of statuses; track s) {
+              <button class="sf-filter-chip"
+                      type="button"
+                      [class.active]="activeStatus() === s"
+                      (click)="selectStatus(s)">
+                <i class="bi"
+                   [ngClass]="s === 'Unread' ? 'bi-envelope' : s === 'Read' ? 'bi-envelope-open' : 'bi-grid'"></i>
+                {{ s }}
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Notification list -->
+        @if (loading()) {
+          <app-spinner></app-spinner>
+        } @else if (apiError()) {
+          <div class="alert alert-danger d-flex gap-2 align-items-center py-2 small">
+            <i class="bi bi-exclamation-triangle-fill"></i>{{ apiError() }}
+          </div>
+        } @else if (notifications().length === 0) {
+          <div class="text-center py-5 sf-muted fade-in">
+            <i class="bi bi-check-circle fs-3 d-block mb-2" style="color:var(--sf-success);"></i>
+            @if (filterMode() === 'Category' && activeCategory() !== 'All') {
+              No unread <strong>{{ activeCategory() }}</strong> notifications.
+            } @else if (filterMode() === 'Status' && activeStatus() !== 'All') {
+              No <strong>{{ activeStatus() }}</strong> notifications.
+            } @else {
+              All caught up! No unread notifications.
+            }
+          </div>
+        } @else {
+          <div class="mt-1">
+            @for (n of notifications(); track n.notificationId) {
+              <div class="sf-notif-item sf-notif-unread"
+                   [class.sf-notif-fading]="markingId() === n.notificationId">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="sf-notif-icon">
+                    <i class="bi {{ categoryIcon(n.category) }}"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="sf-chip" style="font-size:11px;">
+                        <i class="bi {{ categoryIcon(n.category) }} me-1"></i>{{ n.category }}
+                      </span>
+                      <span class="sf-muted" style="font-size:11px;">
+                        {{ n.createdDate | date:'MMM d, HH:mm' }}
+                      </span>
+                    </div>
+                    <p class="mb-2 mt-1 fw-semibold">{{ n.message }}</p>
+                    <div class="d-flex align-items-center gap-2">
+                      @if (n.status.toLowerCase() === 'unread') {
+                        <button class="sf-btn-sm sf-btn-sm-primary"
+                                type="button"
+                                [disabled]="markingId() === n.notificationId"
+                                (click)="markRead(n.notificationId)">
+                          @if (markingId() === n.notificationId) {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                          } @else {
+                            <i class="bi bi-check2 me-1"></i>
+                          }
+                          Mark as Read
+                        </button>
+                      } @else {
+                        <span class="sf-muted" style="font-size:12px;">
+                          <i class="bi bi-envelope-open me-1"></i>Read
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+   

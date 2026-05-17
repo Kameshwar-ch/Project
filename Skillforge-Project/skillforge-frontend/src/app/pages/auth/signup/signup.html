@@ -1,0 +1,127 @@
+<div class="sf-auth-page">
+  <div class="sf-blob sf-blob-1"></div>
+  <div class="sf-blob sf-blob-2"></div>
+
+  <button class="sf-auth-theme-btn" type="button" (click)="toggleTheme()">
+    <i class="bi" [ngClass]="theme.theme() === 'dark' ? 'bi-sun' : 'bi-moon'"></i>
+  </button>
+
+  <div class="sf-auth-card fade-in" style="max-width:480px;">
+    <div class="text-center mb-4">
+      <div class="sf-logo-badge mx-auto mb-3" style="width:48px;height:48px;border-radius:14px;"></div>
+      <h1 class="fw-bold fs-3 mb-1">Create account</h1>
+      <p class="sf-muted small">Join SkillForge and start learning</p>
+    </div>
+
+    <!-- Social -->
+    <div class="d-flex gap-2 mb-4">
+      <button class="sf-oauth-btn flex-grow-1" type="button" (click)="socialLogin('Google')">
+        <svg width="16" height="16" viewBox="0 0 48 48" class="me-1"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+        Google
+      </button>
+      <button class="sf-oauth-btn flex-grow-1" type="button" (click)="socialLogin('GitHub')">
+        <i class="bi bi-github me-1"></i>GitHub
+      </button>
+      <button class="sf-oauth-btn flex-grow-1" type="button" (click)="socialLogin('Microsoft')">
+        <svg width="16" height="16" viewBox="0 0 21 21" class="me-1"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        MS
+      </button>
+    </div>
+
+    <div class="sf-divider"><span>or create with email</span></div>
+
+    @if (success()) {
+      <div class="alert alert-success d-flex align-items-center gap-2 py-2 small mt-3 fade-in">
+        <i class="bi bi-check-circle-fill"></i>
+        Account created! Redirecting to login…
+      </div>
+    }
+
+    @if (error()) {
+      <div class="alert alert-danger d-flex align-items-center gap-2 py-2 small mt-3 fade-in">
+        <i class="bi bi-exclamation-triangle-fill"></i>{{ error() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="mt-3" novalidate>
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="sf-label">Full Name</label>
+          <div class="sf-input-group">
+            <span class="sf-input-icon"><i class="bi bi-person"></i></span>
+            <input type="text" class="sf-input" formControlName="name" placeholder="Jane Smith"
+                   [class.is-invalid]="f['name'].invalid && f['name'].touched" />
+          </div>
+          @if (f['name'].invalid && f['name'].touched) {
+            <div class="sf-field-error">Name must be 3–50 letters and spaces only.</div>
+          }
+        </div>
+
+        <div class="col-12">
+          <label class="sf-label">Email address</label>
+          <div class="sf-input-group">
+            <span class="sf-input-icon"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="sf-input" formControlName="email" placeholder="you@company.com"
+                   [class.is-invalid]="f['email'].invalid && f['email'].touched" />
+          </div>
+          @if (f['email'].invalid && f['email'].touched) {
+            <div class="sf-field-error">Enter a valid email address.</div>
+          }
+        </div>
+
+        <div class="col-md-6">
+          <label class="sf-label">Role</label>
+          <div class="sf-input-group">
+            <span class="sf-input-icon"><i class="bi bi-briefcase"></i></span>
+            <select class="sf-input sf-select" formControlName="role">
+              @for (r of roles; track r) {
+                <option [value]="r">{{ r }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="sf-label">Phone</label>
+          <div class="sf-input-group">
+            <span class="sf-input-icon"><i class="bi bi-phone"></i></span>
+            <input type="tel" class="sf-input" formControlName="phone" placeholder="9876543210"
+                   [class.is-invalid]="f['phone'].invalid && f['phone'].touched" />
+          </div>
+          @if (f['phone'].invalid && f['phone'].touched) {
+            <div class="sf-field-error">Enter 10–15 digits, no leading zero (e.g. 9876543210).</div>
+          }
+        </div>
+
+        <div class="col-12">
+          <label class="sf-label">Password</label>
+          <div class="sf-input-group">
+            <span class="sf-input-icon"><i class="bi bi-lock"></i></span>
+            <input [type]="showPassword() ? 'text' : 'password'" class="sf-input" formControlName="password"
+                   placeholder="min. 8 characters"
+                   [class.is-invalid]="f['password'].invalid && f['password'].touched" />
+            <button type="button" class="sf-input-suffix" (click)="togglePassword()">
+              <i class="bi" [ngClass]="showPassword() ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+          @if (f['password'].invalid && f['password'].touched) {
+            <div class="sf-field-error">Min 8 chars with uppercase, lowercase, digit and special character.</div>
+          }
+        </div>
+      </div>
+
+      <button type="submit" class="sf-btn-primary w-100 mt-4" [disabled]="loading() || success()">
+        @if (loading()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>Creating account…
+        } @else {
+          Create Account
+        }
+      </button>
+    </form>
+
+    <p class="text-center small sf-muted mt-4 mb-0">
+      Already have an account?
+      <a routerLink="/login" class="sf-link fw-semibold">Sign in</a>
+    </p>
+  </div>
+</div>

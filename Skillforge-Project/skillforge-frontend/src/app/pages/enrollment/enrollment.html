@@ -1,0 +1,753 @@
+<div class="sf-page fade-in">
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb sf-breadcrumb mb-1">
+        <li class="breadcrumb-item sf-muted">Home</li>
+        <li class="breadcrumb-item active">Enrollment & Attendance</li>
+      </ol></nav>
+      <h2 class="sf-page-title">Enrollment & Attendance</h2>
+    </div>
+    @if (canAssign) {
+      <button class="sf-btn-primary" type="button" (click)="openBulkAssign()">
+        <i class="bi bi-people me-1"></i>Assign to Team
+      </button>
+    }
+
+    @if (isEmployee) {
+      <button class="sf-btn-ghost" type="button" (click)="openMyRequests()">
+        <i class="bi bi-clock-history me-1"></i>My Requests
+        @if (myRequests().length > 0) {
+          <span class="badge rounded-pill ms-1" style="background:var(--sf-primary);font-size:10px;">{{ myRequests().length }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+      <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+      {{ toast() }}
+    </div>
+  }
+
+  <!-- Filter bar -->
+  <div class="sf-card mb-3">
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      @if (!isEmployee) {
+        <!-- Course search (Manager / Admin / Trainer) -->
+        <div class="sf-input-group" style="max-width:240px;">
+          <span class="sf-input-icon"><i class="bi bi-search"></i></span>
+          <input class="sf-input" placeholder="Search course…"
+            [ngModel]="courseSearch()" (ngModelChange)="courseSearch.set($event)" />
+        </div>
+        <button class="sf-btn-ghost" type="button" (click)="courseSearch.set('')">
+          <i class="bi bi-x-circle me-1"></i>Reset
+        </button>
+        <span class="sf-muted small ms-auto">
+          {{ courseGroups.length }} course{{ courseGroups.length !== 1 ? 's' : '' }}
+        </span>
+      } @else {
+        <!-- Status filter (Employee) -->
+        <select class="sf-select" style="width:auto;"
+          [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+          <option>All</option>
+          <option>Enrolled</option>
+          <option>Waitlist</option>
+          <option>Completed</option>
+        </select>
+        <button class="sf-btn-ghost" type="button" (click)="statusFilter.set('All')">
+          <i class="bi bi-x-circle me-1"></i>Reset
+        </button>
+        <span class="sf-muted small ms-auto">
+          {{ filtered.length }} record{{ filtered.length !== 1 ? 's' : '' }}
+        </span>
+      }
+    </div>
+  </div>
+
+  <!-- Trainer: Pending Attendance Requests panel -->
+  @if (canMark && !isAdmin && (pendingRequests().length > 0 || pendingLoading())) {
+    <div class="sf-card mb-3">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-inbox me-2 text-warning"></i>Pending Attendance Requests</h6>
+        <span class="sf-muted small">{{ pendingRequests().length }} pending</span>
+      </div>
+      @if (pendingLoading()) {
+        <app-spinner></app-spinner>
+      } @else {
+        <div class="table-responsive">
+          <table class="table sf-table mb-0">
+            <thead><tr>
+              <th>Employee</th><th>Course</th><th>Requested Date</th><th>Submitted</th><th>Action</th>
+            </tr></thead>
+            <tbody>
+              @for (r of pendingRequests(); track r.requestID) {
+                <tr class="sf-table-row">
+                  <td class="fw-semibold">{{ r.employeeName }}</td>
+                  <td>{{ r.courseName }}</td>
+                  <td>{{ r.requestDate | date:'MMM d, y' }}</td>
+                  <td class="sf-muted">{{ r.createdAt | date:'MMM d, y' }}</td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <button class="sf-btn-sm sf-btn-sm-primary" type="button"
+                        [disabled]="reviewingId() === r.requestID"
+                        (click)="reviewRequest(r.requestID, true)">
+                        @if (reviewingId() === r.requestID) {
+                          <span class="spinner-border spinner-border-sm me-1"></span>
+                        } @else {
+                          <i class="bi bi-check-lg me-1"></i>
+                        }Approve
+                      </button>
+                      <button class="sf-btn-sm" type="button"
+                        style="color:var(--sf-danger);border-color:var(--sf-danger);"
+                        [disabled]="reviewingId() === r.requestID"
+                        (click)="reviewRequest(r.requestID, false)">
+                        <i class="bi bi-x-lg me-1"></i>Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="text-center py-3 sf-muted">No pending requests.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+
+  <!-- Course-grouped table (Manager / Admin / Trainer) -->
+  @if (!isEmployee) {
+    <div class="sf-card">
+      @if (loading()) {
+        <app-spinner></app-spinner>
+      } @else if (error()) {
+        <div class="alert alert-danger py-2 mb-0">{{ error() }}</div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table sf-table mb-0">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Enrolled</th>
+                <th>Waitlist</th>
+                <th>Completed</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (g of courseGroups; track g.courseId) {
+                <tr class="sf-table-row">
+                  <td class="fw-semibold">{{ g.courseName }}</td>
+                  <td>
+                    @if (g.enrolled > 0) {
+                      <span class="badge" style="background:var(--sf-primary)">{{ g.enrolled }}</span>
+                    } @else { <span class="sf-muted">—</span> }
+                  </td>
+                  <td>
+                    @if (g.waitlist > 0) {
+                      <span class="badge bg-warning text-dark">{{ g.waitlist }}</span>
+                    } @else { <span class="sf-muted">—</span> }
+                  </td>
+                  <td>
+                    @if (g.completed > 0) {
+                      <span class="badge bg-success">{{ g.completed }}</span>
+                    } @else { <span class="sf-muted">—</span> }
+                  </td>
+                  <td class="sf-muted">{{ g.total }}</td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <button class="sf-btn-sm sf-btn-sm-primary" type="button"
+                              (click)="openEnrollees(g.courseId, g.courseName)"
+                              title="View enrolled employees">
+                        <i class="bi bi-people me-1"></i>View Enrollees
+                      </button>
+                      @if (canMark && g.enrolled > 0) {
+                      <button class="sf-btn-sm" type="button"
+                              (click)="openMarkAttendance({ id: g.courseId, name: g.courseName })">
+                        <i class="bi bi-calendar-check me-1"></i>Mark Attendance
+                      </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="text-center py-4 sf-muted">No enrollment records found.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Employee: flat list of own enrollments -->
+  @if (isEmployee) {
+    <div class="sf-card">
+      @if (loading()) {
+        <app-spinner></app-spinner>
+      } @else if (error()) {
+        <div class="alert alert-danger py-2 mb-0">{{ error() }}</div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table sf-table mb-0">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Enrolled On</th>
+                <th>Status</th>
+                <th>Last Attendance</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of filtered; track e.enrollmentId) {
+                <tr class="sf-table-row">
+                  <td class="fw-semibold">{{ e.courseName }}</td>
+                  <td class="sf-muted">{{ e.enrollmentDate | date:'MMM d, y' }}</td>
+                  <td><app-status-badge [status]="e.status"></app-status-badge></td>
+                  <td><app-status-badge [status]="e.lastAttendance"></app-status-badge></td>
+                  <td>
+                    <div class="d-flex gap-1 flex-wrap">
+                      <button class="sf-btn-sm" type="button" (click)="openAttendanceHistory(e)"
+                        title="View my attendance for this course">
+                        <i class="bi bi-calendar3 me-1"></i>History
+                      </button>
+                      @if (e.status === 'Enrolled') {
+                        <button class="sf-btn-sm" type="button" (click)="openRequestAttendance(e)"
+                          title="Request trainer to mark your attendance">
+                          <i class="bi bi-send me-1"></i>Request
+                        </button>
+                      }
+                      @if (e.status === 'Waitlist') {
+                        <span class="sf-muted small" style="font-size:11px;">
+                          <i class="bi bi-hourglass-split me-1"></i>Awaiting trainer approval
+                        </span>
+                      }
+                      @if (e.status === 'Completed') {
+                        @let cert = certForEnrollment(e);
+                        @if (cert) {
+                          <button class="sf-btn-sm sf-btn-sm-primary" type="button"
+                            [disabled]="downloadingId() === cert.certificationId"
+                            (click)="downloadCert(cert)"
+                            title="Download your certificate for this course"
+                            style="background:var(--sf-success,#28a745);border-color:var(--sf-success,#28a745);color:#fff;">
+                            @if (downloadingId() === cert.certificationId) {
+                              <span class="spinner-border spinner-border-sm me-1"></span>
+                            } @else {
+                              <i class="bi bi-award me-1"></i>
+                            }Download Cert
+                          </button>
+                        }
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="text-center py-4 sf-muted">No enrollment records found.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+
+<!-- ── Enrollees Modal ───────────────────────────────────────────────── -->
+@if (showEnrolleesModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeEnrolleesModal()">
+  <div class="sf-modal" style="max-width:680px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0">
+        <i class="bi bi-people me-2"></i>{{ enrolleesCourseName() }} — Enrollees
+      </h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeEnrolleesModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      <!-- Search + count -->
+      <div class="d-flex gap-2 align-items-center mb-3">
+        <div class="sf-input-group flex-grow-1">
+          <span class="sf-input-icon"><i class="bi bi-search"></i></span>
+          <input class="sf-input" placeholder="Search employee…"
+            [ngModel]="enrolleeSearch()" (ngModelChange)="enrolleeSearch.set($event)" />
+        </div>
+        <span class="sf-muted small">{{ enrolleesList.length }} employee{{ enrolleesList.length !== 1 ? 's' : '' }}</span>
+      </div>
+
+      <div class="table-responsive" style="max-height:400px;overflow-y:auto;">
+        <table class="table sf-table mb-0">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Enrolled On</th>
+              <th>Status</th>
+              <th>Last Attendance</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of enrolleesList; track e.enrollmentId) {
+              <tr class="sf-table-row">
+                <td class="fw-semibold">{{ e.employeeName }}</td>
+                <td class="sf-muted">{{ e.enrollmentDate | date:'MMM d, y' }}</td>
+                <td><app-status-badge [status]="e.status"></app-status-badge></td>
+                <td><app-status-badge [status]="e.lastAttendance"></app-status-badge></td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    @if (canMark && e.status === 'Waitlist') {
+                      <button class="sf-btn-sm sf-btn-sm-primary" type="button"
+                        [disabled]="updatingStatusId() === e.enrollmentId"
+                        (click)="updateEnrollmentStatus(e, true)"
+                        title="Approve this employee">
+                        @if (updatingStatusId() === e.enrollmentId) {
+                          <span class="spinner-border spinner-border-sm me-1"></span>
+                        } @else {
+                          <i class="bi bi-check-lg me-1"></i>
+                        }Approve
+                      </button>
+                    }
+                    @if (canMark && e.status === 'Enrolled') {
+                      <button class="sf-btn-sm" type="button"
+                        style="color:var(--sf-danger);border-color:var(--sf-danger);"
+                        [disabled]="updatingStatusId() === e.enrollmentId"
+                        (click)="updateEnrollmentStatus(e, false)"
+                        title="Move back to Waitlist">
+                        <i class="bi bi-hourglass-split me-1"></i>Waitlist
+                      </button>
+                    }
+                    <button class="sf-btn-sm" type="button" (click)="openAttendanceHistory(e)"
+                      title="View attendance history">
+                      <i class="bi bi-calendar3 me-1"></i>History
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="text-center py-4 sf-muted">No employees found.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3">
+        <button type="button" class="sf-btn-ghost" (click)="closeEnrolleesModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── Request Attendance Modal (Employee) ──────────────────────────── -->
+@if (showReqModal() && reqEnrollment()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeReqModal()">
+  <div class="sf-modal" style="max-width:420px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-send me-2"></i>Request Attendance Marking</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeReqModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      <div class="mb-3">
+        <label class="sf-label">Course</label>
+        <input class="sf-input w-100" [value]="reqEnrollment()!.courseName" readonly />
+      </div>
+
+      <div class="mb-3">
+        <label class="sf-label">Date You Attended <span class="text-danger">*</span></label>
+        <input type="date" class="sf-input w-100"
+          [ngModel]="reqDate()" (ngModelChange)="reqDate.set($event)"
+          [min]="reqMinDate()"
+          [max]="todayIso()" />
+        <div class="sf-muted small mt-1">
+          <i class="bi bi-calendar-range me-1"></i>
+          Valid range: <strong>{{ reqMinDate() | date:'MMM d, y' }}</strong>
+          (enrolled {{ reqEnrollment()!.enrollmentDate | date:'MMM d' }}) to <strong>today</strong>
+        </div>
+      </div>
+
+      <p class="sf-muted small mb-3">
+        <i class="bi bi-info-circle me-1"></i>
+        Requests are limited to the last 7 days. Your trainer will review and mark attendance upon approval.
+      </p>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeReqModal()">Cancel</button>
+        <button type="button" class="sf-btn-primary"
+          [disabled]="reqSubmitting() || !reqDate()"
+          (click)="submitAttendanceRequest()">
+          @if (reqSubmitting()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          <i class="bi bi-send me-1"></i>Submit Request
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+}
+
+<!-- ── Bulk-Assign Modal ────────────────────────────────────────────────── -->
+@if (showBulkModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeBulkModal()">
+  <div class="sf-modal" style="max-width:620px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Assign Training to Team</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeBulkModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      @if (bulkDataLoading()) {
+        <app-spinner></app-spinner>
+      } @else if (!bulkResult()) {
+
+        <!-- Step: pick course -->
+        <div class="mb-3">
+          <label class="sf-label">Course <span class="text-danger">*</span></label>
+          <select class="sf-select w-100"
+            [ngModel]="bulkCourseId()" (ngModelChange)="bulkCourseId.set(+$event || null)">
+            <option [ngValue]="null" disabled>Select a live course…</option>
+            @for (c of bulkCourses(); track c.courseID) {
+              <option [ngValue]="c.courseID">{{ c.title }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Employee list -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="sf-label mb-0">
+              Employees
+              <span class="sf-muted small ms-1">({{ selectedEmployees().size }} selected)</span>
+            </label>
+            <button class="sf-btn-ghost" style="font-size:12px;" type="button" (click)="toggleSelectAll()">
+              {{ allSelected ? 'Deselect All' : 'Select All' }}
+            </button>
+          </div>
+          <div style="max-height:240px;overflow-y:auto;border:1px solid var(--sf-border);border-radius:8px;">
+            @for (emp of bulkEmployees(); track emp.userID) {
+              <label class="d-flex align-items-center gap-2 px-3 py-2 sf-table-row"
+                style="cursor:pointer;margin:0;">
+                <input type="checkbox"
+                  [checked]="isEmployeeSelected(emp.userID)"
+                  (change)="toggleEmployee(emp.userID)"
+                  style="accent-color:var(--sf-primary);width:16px;height:16px;" />
+                <span class="fw-semibold">{{ emp.userName }}</span>
+                <span class="sf-muted small ms-auto">{{ emp.email }}</span>
+              </label>
+            } @empty {
+              <p class="sf-muted text-center py-3 mb-0">No active employees found.</p>
+            }
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="sf-btn-ghost" (click)="closeBulkModal()">Cancel</button>
+          <button type="button" class="sf-btn-primary"
+            [disabled]="bulkSubmitting() || !bulkCourseId() || selectedEmployees().size === 0"
+            (click)="submitBulkEnroll()">
+            @if (bulkSubmitting()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            <i class="bi bi-people me-1"></i>Assign ({{ selectedEmployees().size }})
+          </button>
+        </div>
+
+      } @else {
+        <!-- Result summary -->
+        <div class="text-center mb-3">
+          @if (bulkResult()!.succeeded === bulkResult()!.totalRequested) {
+            <i class="bi bi-check-circle-fill text-success" style="font-size:2.5rem;"></i>
+            <div class="fw-semibold mt-2">All {{ bulkResult()!.succeeded }} employees enrolled successfully!</div>
+          } @else if (bulkResult()!.succeeded === 0) {
+            <i class="bi bi-x-circle-fill text-danger" style="font-size:2.5rem;"></i>
+            <div class="fw-semibold mt-2">Enrollment failed for all employees.</div>
+          } @else {
+            <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size:2.5rem;"></i>
+            <div class="fw-semibold mt-2">
+              {{ bulkResult()!.succeeded }} succeeded, {{ bulkResult()!.failed }} failed
+            </div>
+          }
+        </div>
+
+        <!-- Per-employee results -->
+        <div style="max-height:220px;overflow-y:auto;" class="mb-3">
+          @for (r of bulkResult()!.results; track r.employeeId) {
+            <div class="d-flex align-items-center gap-2 px-2 py-1 sf-table-row">
+              <i class="bi"
+                [ngClass]="r.status === 'Success' ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'">
+              </i>
+              <span class="fw-semibold small">Employee #{{ r.employeeId }}</span>
+              @if (r.reason) {
+                <span class="sf-muted small ms-auto">{{ r.reason }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button type="button" class="sf-btn-primary" (click)="closeBulkModal()">Close</button>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── Mark Attendance Modal ───────────────────────────────────────────── -->
+@if (showAttModal() && attCourse()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeAttModal()">
+  <div class="sf-modal" style="max-width:600px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-calendar-check me-2"></i>Mark Attendance</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeAttModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-6">
+          <label class="sf-label">Course</label>
+          <input class="sf-input w-100" [value]="attCourse()!.name" readonly />
+        </div>
+        <div class="col-md-6">
+          <label class="sf-label">Attendance Date</label>
+          <div class="d-flex gap-2">
+            <input type="date" class="sf-input w-100"
+              [ngModel]="attDate()" (ngModelChange)="attDate.set($event)" />
+            <button class="sf-btn-sm" type="button" (click)="loadPreview()"
+              [disabled]="previewLoading()" title="Reload preview">
+              @if (previewLoading()) {
+                <span class="spinner-border spinner-border-sm"></span>
+              } @else {
+                <i class="bi bi-arrow-clockwise"></i>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if (previewError()) {
+        <div class="alert alert-warning py-2 mb-3">{{ previewError() }}</div>
+      }
+
+      @if (previewLoading()) {
+        <app-spinner></app-spinner>
+      } @else if (attRecords().length > 0) {
+        <div class="table-responsive mb-3" style="max-height:280px;overflow-y:auto;">
+          <table class="table sf-table mb-0">
+            <thead><tr><th>Employee</th><th>Course Status</th><th>Attendance</th></tr></thead>
+            <tbody>
+              @for (r of attRecords(); track r.enrollmentID) {
+                <tr class="sf-table-row">
+                  <td class="fw-semibold">{{ r.employeeName }}</td>
+                  <td>
+                    <span class="sf-chip"
+                      [style.color]="r.courseStatus === 'Accessed' ? 'var(--sf-success)' : 'var(--sf-muted-color)'">
+                      <i class="bi me-1"
+                        [ngClass]="r.courseStatus === 'Accessed' ? 'bi-check-circle-fill' : 'bi-dash-circle'"></i>
+                      {{ r.courseStatus }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <button type="button" class="sf-btn-sm"
+                        [class.sf-btn-sm-primary]="r.status === 0"
+                        (click)="setStatus(r.enrollmentID, 0)">
+                        <i class="bi bi-check-lg me-1"></i>Present
+                      </button>
+                      <button type="button" class="sf-btn-sm"
+                        [style.color]="r.status === 1 ? 'var(--sf-danger)' : ''"
+                        [style.border-color]="r.status === 1 ? 'var(--sf-danger)' : ''"
+                        (click)="setStatus(r.enrollmentID, 1)">
+                        <i class="bi bi-x-lg me-1"></i>Absent
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex gap-2 mb-3">
+          <div class="sf-stat-chip">
+            <span class="fw-bold text-success">{{ attRecords().filter(r => r.status === 0).length }}</span> Present
+          </div>
+          <div class="sf-stat-chip">
+            <span class="fw-bold text-danger">{{ attRecords().filter(r => r.status === 1).length }}</span> Absent
+          </div>
+        </div>
+      } @else if (!previewError()) {
+        <p class="sf-muted text-center py-3">No enrollments found for this course on the selected date.</p>
+      }
+
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeAttModal()">Cancel</button>
+        <button type="button" class="sf-btn-primary"
+          [disabled]="attSubmitting() || attRecords().length === 0"
+          (click)="submitAttendance()">
+          @if (attSubmitting()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          <i class="bi bi-check2-all me-1"></i>Submit Attendance
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── My Attendance Requests Modal (Employee) ──────────────────────── -->
+@if (showMyRequestsModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeMyRequestsModal()">
+  <div class="sf-modal" style="max-width:640px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0">
+        <i class="bi bi-clock-history me-2"></i>My Attendance Requests
+      </h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeMyRequestsModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      @if (myRequestsLoading()) {
+        <app-spinner></app-spinner>
+      } @else if (allMyRequests().length === 0) {
+        <div class="text-center py-5 sf-muted">
+          <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+          No attendance requests submitted yet.
+        </div>
+      } @else {
+        <!-- Summary chips -->
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+          <div class="sf-stat-chip">
+            <span class="fw-bold" style="color:var(--sf-primary)">{{ allMyRequests().length }}</span> Total
+          </div>
+          <div class="sf-stat-chip">
+            <span class="fw-bold text-warning">{{ allMyRequests().filter(r => r.status === 'Pending').length }}</span> Pending
+          </div>
+          <div class="sf-stat-chip">
+            <span class="fw-bold text-success">{{ allMyRequests().filter(r => r.status === 'Approved').length }}</span> Approved
+          </div>
+          <div class="sf-stat-chip">
+            <span class="fw-bold text-danger">{{ allMyRequests().filter(r => r.status === 'Rejected').length }}</span> Rejected
+          </div>
+        </div>
+
+        <div class="table-responsive" style="max-height:400px;overflow-y:auto;">
+          <table class="table sf-table mb-0">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Requested Date</th>
+                <th>Submitted On</th>
+                <th>Status</th>
+                <th>Trainer Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of allMyRequests(); track r.requestID) {
+                <tr class="sf-table-row">
+                  <td class="fw-semibold">{{ r.courseName }}</td>
+                  <td>{{ r.requestDate | date:'MMM d, y' }}</td>
+                  <td class="sf-muted">{{ r.createdAt | date:'MMM d, y' }}</td>
+                  <td>
+                    @if (r.status === 'Pending') {
+                      <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                    } @else if (r.status === 'Approved') {
+                      <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i>Approved</span>
+                    } @else {
+                      <span class="badge bg-danger"><i class="bi bi-x-lg me-1"></i>Rejected</span>
+                    }
+                  </td>
+                  <td class="sf-muted small">{{ r.trainerNote || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="d-flex justify-content-end mt-3">
+        <button type="button" class="sf-btn-ghost" (click)="closeMyRequestsModal()">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── Attendance History Modal ──────────────────────────────────────── -->
+@if (showHistoryModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeHistoryModal()">
+  <div class="sf-modal" style="max-width:560px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0">
+        <i class="bi bi-calendar3 me-2"></i>
+        @if (historyData()) { {{ historyData()!.courseName }} — Attendance } @else { Attendance Records }
+      </h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeHistoryModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      @if (historyLoading()) {
+        <app-spinner></app-spinner>
+      } @else if (historyError()) {
+        <div class="alert alert-danger py-2 mb-0">{{ historyError() }}</div>
+      } @else if (historyData()) {
+
+        <!-- Summary chips -->
+        <div class="d-flex gap-2 mb-3">
+          <div class="sf-stat-chip">
+            <span class="fw-bold text-success">{{ historyData()!.presentCount }}</span> Present
+          </div>
+          <div class="sf-stat-chip">
+            <span class="fw-bold text-danger">{{ historyData()!.absentCount }}</span> Absent
+          </div>
+          <div class="sf-stat-chip ms-auto sf-muted">
+            {{ historyData()!.records.length }} session{{ historyData()!.records.length !== 1 ? 's' : '' }} total
+          </div>
+        </div>
+
+        @if (historyData()!.records.length > 0) {
+          <div class="table-responsive" style="max-height:320px;overflow-y:auto;">
+            <table class="table sf-table mb-0">
+              <thead><tr><th>#</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody>
+                @for (r of historyData()!.records; track r.attendanceID; let i = $index) {
+                  <tr class="sf-table-row">
+                    <td class="sf-muted">{{ i + 1 }}</td>
+                    <td>{{ r.attendanceDate | date:'EEE, MMM d y' }}</td>
+                    <td>
+                      <span class="badge"
+                        [style.background]="r.status === 'Present' ? 'var(--sf-success)' : 'var(--sf-danger)'">
+                        <i class="bi me-1"
+                          [ngClass]="r.status === 'Present' ? 'bi-check-lg' : 'bi-x-lg'"></i>
+                        {{ r.status }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="sf-muted text-center py-4 mb-0">No attendance records yet for this enrollment.</p>
+        }
+
+      }
+
+      <div class="d-flex justify-content-end mt-3">
+        <button type="button" class="sf-btn-ghost" (click)="closeHistoryModal()">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+}

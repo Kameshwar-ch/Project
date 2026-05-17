@@ -1,0 +1,549 @@
+<div class="sf-page fade-in">
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb sf-breadcrumb mb-1">
+          <li class="breadcrumb-item sf-muted">Home</li>
+          <li class="breadcrumb-item active">Training Catalog</li>
+        </ol>
+      </nav>
+      <h2 class="sf-page-title">
+        @if (isTrainer) { My Courses } @else { Training Catalog }
+      </h2>
+    </div>
+    @if (canCreate) {
+    <button class="sf-btn-primary" type="button" (click)="openCreate()">
+      <i class="bi bi-plus-circle me-1"></i>Create Course
+    </button>
+    }
+  </div>
+
+  <!-- Toast -->
+  @if (toast()) {
+  <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+    <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+    {{ toast() }}
+  </div>
+  }
+
+  <!-- Filters -->
+  <div class="sf-card mb-3">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      @if (isTrainer) {
+      <span class="sf-chip" style="border-color:var(--sf-primary);color:var(--sf-primary);">
+        <i class="bi bi-person-video2 me-1"></i>Showing only your courses
+      </span>
+      }
+      <div class="sf-input-group" style="max-width:280px;">
+        <span class="sf-input-icon"><i class="bi bi-search"></i></span>
+        <input class="sf-input" placeholder="Search title or description…" [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)" />
+      </div>
+      @if (!isEmployee) {
+      <div class="d-flex rounded overflow-hidden" style="border:1px solid var(--sf-border);">
+        <button type="button" class="sf-btn-ghost" style="border-radius:0;border:none;padding:6px 16px;"
+          [style.background]="statusFilter() === 'All' ? 'var(--sf-primary)' : 'transparent'"
+          [style.color]="statusFilter() === 'All' ? '#fff' : ''"
+          (click)="statusFilter.set('All')">All</button>
+        <button type="button" class="sf-btn-ghost" style="border-radius:0;border:none;border-left:1px solid var(--sf-border);padding:6px 16px;"
+          [style.background]="statusFilter() === 'Live' ? 'var(--sf-primary)' : 'transparent'"
+          [style.color]="statusFilter() === 'Live' ? '#fff' : ''"
+          (click)="statusFilter.set('Live')">
+          <i class="bi bi-broadcast me-1"></i>Live</button>
+        <button type="button" class="sf-btn-ghost" style="border-radius:0;border:none;border-left:1px solid var(--sf-border);padding:6px 16px;"
+          [style.background]="statusFilter() === 'Draft' ? 'var(--sf-secondary,#6c757d)' : 'transparent'"
+          [style.color]="statusFilter() === 'Draft' ? '#fff' : ''"
+          (click)="statusFilter.set('Draft')">
+          <i class="bi bi-pencil-square me-1"></i>Draft</button>
+      </div>
+      }
+      @if (isEmployee) {
+      <div class="d-flex rounded overflow-hidden" style="border:1px solid var(--sf-border);">
+        <button type="button"
+          class="sf-btn-ghost"
+          style="border-radius:0;border:none;padding:6px 14px;"
+          [style.background]="!showEnrolledOnly() ? 'var(--sf-primary)' : 'transparent'"
+          [style.color]="!showEnrolledOnly() ? '#fff' : ''"
+          (click)="showEnrolledOnly.set(false)">
+          <i class="bi bi-collection me-1"></i>All Courses
+        </button>
+        <button type="button"
+          class="sf-btn-ghost"
+          style="border-radius:0;border:none;border-left:1px solid var(--sf-border);padding:6px 14px;"
+          [style.background]="showEnrolledOnly() ? 'var(--sf-primary)' : 'transparent'"
+          [style.color]="showEnrolledOnly() ? '#fff' : ''"
+          (click)="showEnrolledOnly.set(true)">
+          <i class="bi bi-bookmark-check me-1"></i>My Courses
+        </button>
+      </div>
+      }
+      <button class="sf-btn-ghost" type="button" (click)="searchTerm.set(''); statusFilter.set('All'); showEnrolledOnly.set(false)">
+        <i class="bi bi-x-circle me-1"></i>Reset
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+  <app-spinner></app-spinner>
+  } @else {
+  <div class="sf-card">
+    <div style="max-height:460px;overflow-y:auto;">
+      <table class="table sf-table mb-0 align-middle" style="table-layout:fixed;width:100%;">
+        <colgroup>
+          <col style="width:22%">
+          <col style="width:30%">
+          <col style="width:12%">
+          <col style="width:12%">
+          <col style="width:24%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Course</th>
+            <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Description</th>
+            <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Duration</th>
+            <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Status</th>
+            <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (course of filteredCourses(); track course.courseID) {
+            <tr class="sf-table-row">
+              <td class="fw-semibold">{{ course.title }}</td>
+              <td class="sf-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                {{ course.description || '—' }}
+              </td>
+              <td>{{ course.duration }}h</td>
+              <td>
+                <app-status-badge [status]="course.status ? 'Live' : 'Draft'"></app-status-badge>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  @if (canEnroll && course.status) {
+                  @if (isEnrolled(course.courseID)) {
+                  <button class="sf-btn-sm sf-btn-sm-primary" type="button" (click)="viewModules(course)">
+                    <i class="bi bi-collection-play me-1"></i>View Modules
+                  </button>
+                  } @else if (isWaitlisted(course.courseID)) {
+                  <button class="sf-btn-sm" type="button" disabled style="opacity:0.7;">
+                    <i class="bi bi-hourglass-split me-1"></i>Waiting for Approval
+                  </button>
+                  } @else {
+                  <button class="sf-btn-sm sf-btn-sm-primary" type="button" (click)="openEnroll(course)">
+                    <i class="bi bi-plus me-1"></i>Enroll
+                  </button>
+                  }
+                  }
+                  @if (canCreate) {
+                  <button class="sf-btn-sm" type="button" (click)="editCourse(course)">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="sf-btn-sm sf-btn-sm-primary" type="button" (click)="openModules(course)"
+                          title="Manage Modules">
+                    <i class="bi bi-collection-play me-1"></i>Modules
+                  </button>
+                  }
+                  
+                  <button class="sf-btn-sm" type="button" (click)="viewCourse(course)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="text-center py-4 sf-muted">
+                <i class="bi bi-collection fs-3 d-block mb-2"></i>
+                No courses found.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+</div>
+
+<!-- Enroll Confirmation Modal -->
+@if (showEnrollModal() && enrollTarget()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeEnroll()">
+  <div class="sf-modal" style="max-width:440px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-person-plus me-2"></i>Confirm Enrollment</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeEnroll()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      <!-- Course summary card -->
+      <div class="sf-card mb-4" style="background:var(--sf-bg);">
+        <div class="fw-semibold fs-6 mb-1">{{ enrollTarget()!.title }}</div>
+        <div class="sf-muted small mb-2">{{ enrollTarget()!.description }}</div>
+        <div class="d-flex gap-3">
+          <span class="sf-muted small"><i class="bi bi-clock me-1"></i>{{ enrollTarget()!.duration }}h</span>
+          <app-status-badge [status]="'Live'"></app-status-badge>
+        </div>
+      </div>
+
+      <p class="sf-muted small mb-4">
+        <i class="bi bi-info-circle me-1"></i>
+        By confirming, you will be enrolled in this course and it will appear in your Enrollment & Attendance page.
+      </p>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeEnroll()">Cancel</button>
+        <button type="button" class="sf-btn-primary" [disabled]="enrollLoading()" (click)="confirmEnroll()">
+          @if (enrollLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          <i class="bi bi-person-plus me-1"></i>Confirm Enrollment
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- Create Course Modal -->
+@if (showCreateModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeCreate()">
+  <div class="sf-modal" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-plus-square me-2"></i>Create Course</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeCreate()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="sf-modal-body">
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" novalidate>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <label class="sf-label">Title <span class="text-danger">*</span></label>
+            <span class="sf-muted" style="font-size:11px;">
+              {{ createForm.get('title')?.value?.length ?? 0 }}/20
+            </span>
+          </div>
+          <input class="sf-input w-100" formControlName="title" placeholder="e.g. Secure Coding 101" maxlength="20"
+            [class.is-invalid]="createForm.get('title')?.invalid && createForm.get('title')?.touched" />
+          @if (createForm.get('title')?.invalid && createForm.get('title')?.touched) {
+          <div class="sf-field-error">Title is required and cannot exceed 20 characters.</div>
+          }
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <label class="sf-label">Description <span class="text-danger">*</span></label>
+            <span class="sf-muted" style="font-size:11px;">
+              {{ createForm.get('description')?.value?.length ?? 0 }}/50
+            </span>
+          </div>
+          <textarea class="sf-input w-100" rows="3" formControlName="description" placeholder="Course overview…"
+            maxlength="50"
+            [class.is-invalid]="createForm.get('description')?.invalid && createForm.get('description')?.touched"></textarea>
+          @if (createForm.get('description')?.invalid && createForm.get('description')?.touched) {
+          <div class="sf-field-error">Description is required and cannot exceed 50 characters.</div>
+          }
+        </div>
+        @if (isAdmin) {
+        <div class="mb-3">
+          <label class="sf-label">Assign Trainer <span class="text-danger">*</span></label>
+          <select class="sf-select w-100" formControlName="trainerID"
+            [class.is-invalid]="createForm.get('trainerID')?.invalid && createForm.get('trainerID')?.touched">
+            <option [ngValue]="null" disabled>Select a trainer…</option>
+            @for (t of trainers(); track t.userID) {
+              <option [ngValue]="t.userID">{{ t.userName }} (ID: {{ t.userID }})</option>
+            }
+          </select>
+          @if (trainers().length === 0) {
+            <div class="sf-muted small mt-1"><i class="bi bi-info-circle me-1"></i>Loading trainers…</div>
+          }
+        </div>
+        }
+        <div class="row g-2 mb-3">
+          <div class="col">
+            <label class="sf-label">Duration (hours) <span class="text-danger">*</span></label>
+            <input type="number" class="sf-input w-100" formControlName="duration" min="1" max="100" step="1"
+              [class.is-invalid]="createForm.get('duration')?.invalid && createForm.get('duration')?.touched" />
+            <div class="invalid-feedback">Duration must be between 1 and 100 hours.</div>
+          </div>
+          <div class="col">
+            <label class="sf-label">Status</label>
+            <select class="sf-select w-100" formControlName="status">
+              <option value="false">Draft</option>
+              <option value="true">Live</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="sf-btn-ghost" (click)="closeCreate()">Cancel</button>
+          <button type="submit" class="sf-btn-primary" [disabled]="createLoading()">
+            @if (createLoading()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            Create Course
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+}
+
+
+@if (showDeleteModal() && courseToDelete()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeDelete()">
+  <div class="sf-modal" style="max-width:420px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-trash me-2" style="color:var(--sf-danger);"></i>Delete Course</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeDelete()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+      <p class="mb-1">Are you sure you want to delete:</p>
+      <p class="fw-semibold fs-6 mb-3">"{{ courseToDelete()!.title }}"</p>
+      <p class="sf-muted small mb-4">This action is permanent and cannot be undone.</p>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeDelete()">Cancel</button>
+        <button type="button" class="sf-btn-primary" style="background:var(--sf-danger);border-color:var(--sf-danger);"
+                [disabled]="deleteLoading()" (click)="confirmDelete()">
+          @if (deleteLoading()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          <i class="bi bi-trash me-1"></i>Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+@if (showModuleModal() && moduleTargetCourse()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeModules()">
+  <div class="sf-modal" style="max-width:600px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0">
+        <i class="bi bi-collection-play me-2"></i>Modules — {{ moduleTargetCourse()!.title }}
+      </h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeModules()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      @if (canCreate) {
+        @if (!moduleTargetCourse()!.status) {
+          <div class="sf-muted small mb-3 d-flex align-items-center gap-1">
+            <i class="bi bi-info-circle"></i> Modules can only be added while the course is in <strong>Draft</strong> status.
+          </div>
+        } @else {
+          <div class="sf-muted small mb-3 d-flex align-items-center gap-1" style="color:var(--sf-warning,#f59e0b);">
+            <i class="bi bi-exclamation-triangle"></i> This course is <strong>Live</strong> — set it back to Draft to add modules.
+          </div>
+        }
+      }
+
+      <!-- Employee: Course completion banner -->
+      @if (isEmployee && completedCourseIds().has(moduleTargetCourse()!.courseID)) {
+        <div class="d-flex align-items-center gap-2 mb-3 p-3 rounded"
+          style="background:linear-gradient(135deg,#d4edda,#c3e6cb);border:1px solid #b8dacc;">
+          <i class="bi bi-award-fill" style="font-size:1.4rem;color:#1a7a3e;"></i>
+          <div>
+            <div class="fw-bold" style="color:#1a7a3e;">Course Completed!</div>
+            <div class="small" style="color:#155724;">Go to Enrollment & Attendance to download your certificate.</div>
+          </div>
+        </div>
+      }
+
+      <!-- Employee: Module progress bar -->
+      @if (isEmployee && enrolledCourseIds().has(moduleTargetCourse()!.courseID) && modules().length > 0) {
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="small fw-semibold">Progress</span>
+            @if (progressLoading()) {
+              <span class="sf-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Loading…</span>
+            } @else {
+              <span class="sf-muted small">
+                {{ moduleProgress().size }} of {{ modules().length }} module{{ modules().length !== 1 ? 's' : '' }} completed
+              </span>
+            }
+          </div>
+          <div class="progress" style="height:8px;border-radius:4px;">
+            <div class="progress-bar" role="progressbar"
+              [style.width]="modules().length > 0 ? (moduleProgress().size / modules().length * 100) + '%' : '0%'"
+              style="background:var(--sf-primary);transition:width 0.4s;">
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Existing modules list -->
+      <div class="mb-4">
+        <div class="sf-card-title mb-2"><i class="bi bi-list-ul me-1"></i>Existing Modules</div>
+        @if (modulesLoading()) {
+          <app-spinner></app-spinner>
+        } @else if (modules().length === 0) {
+          <p class="sf-muted small text-center py-2">No modules yet. Add one below.</p>
+        } @else {
+          <div style="max-height:240px;overflow-y:auto;">
+            <table class="table sf-table mb-0" style="table-layout:fixed;width:100%;">
+              <colgroup>
+                @if (isEmployee) {
+                  <col style="width:5%">
+                  <col style="width:25%">
+                  <col style="width:32%">
+                  <col style="width:12%">
+                  <col style="width:26%">
+                } @else {
+                  <col style="width:5%">
+                  <col style="width:28%">
+                  <col style="width:35%">
+                  <col style="width:14%">
+                  <col style="width:18%">
+                }
+              </colgroup>
+              <thead>
+                <tr>
+                  <th style="position:sticky;top:0;background:var(--sf-panel);z-index:1;">#</th>
+                  <th style="position:sticky;top:0;background:var(--sf-panel);z-index:1;">Title</th>
+                  <th style="position:sticky;top:0;background:var(--sf-panel);z-index:1;">Description</th>
+                  <th style="position:sticky;top:0;background:var(--sf-panel);z-index:1;">Duration</th>
+                  @if (canCreate) {
+                    <th style="position:sticky;top:0;background:var(--sf-panel);z-index:1;">Actions</th>
+                  }
+                  @if (isEmployee) {
+                    <th style="position:sticky;top:0;background:var(--sf-panel);z-index:1;">Status</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (m of modules(); track m.moduleID; let i = $index) {
+                  <tr class="sf-table-row" [style.opacity]="isModuleCompleted(m.moduleID) ? '0.75' : '1'">
+                    <td class="sf-muted">{{ i + 1 }}</td>
+                    <td class="fw-semibold">
+                      @if (isModuleCompleted(m.moduleID)) {
+                        <i class="bi bi-check-circle-fill me-1" style="color:var(--sf-success,#28a745);"></i>
+                      }
+                      {{ m.title }}
+                    </td>
+                    <td class="sf-muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ m.contentURI || '—' }}</td>
+                    <td>{{ m.duration }}h</td>
+                    @if (canCreate) {
+                      <td>
+                        <div class="d-flex gap-1">
+                          <button class="sf-btn-sm" type="button" (click)="openEditModule(m)" title="Edit module">
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button class="sf-btn-sm" type="button" style="color:var(--sf-danger);"
+                            (click)="openDeleteModule(m)" title="Delete module">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    }
+                    @if (isEmployee && enrolledCourseIds().has(moduleTargetCourse()!.courseID)) {
+                      <td>
+                        @if (isModuleCompleted(m.moduleID)) {
+                          <span class="badge" style="background:var(--sf-success,#28a745);font-size:11px;">
+                            <i class="bi bi-check-lg me-1"></i>Done
+                          </span>
+                        } @else if (!completedCourseIds().has(moduleTargetCourse()!.courseID)) {
+                          <button class="sf-btn-sm sf-btn-sm-primary"
+                            type="button"
+                            [disabled]="markCompleteId() === m.moduleID"
+                            (click)="markModuleComplete(m.moduleID)"
+                            title="Mark this module as completed">
+                            @if (markCompleteId() === m.moduleID) {
+                              <span class="spinner-border spinner-border-sm me-1"></span>
+                            } @else {
+                              <i class="bi bi-check2 me-1"></i>
+                            }Mark Complete
+                          </button>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- Add module form (only in Draft, only for Trainer/Admin) -->
+      @if (!moduleTargetCourse()!.status && canCreate) {
+      <div class="sf-card-title mb-2"><i class="bi bi-plus-circle me-1"></i>Add New Module</div>
+      <form [formGroup]="moduleForm" (ngSubmit)="submitModule()" novalidate>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <label class="sf-label">Title <span class="text-danger">*</span></label>
+            <span class="sf-muted" style="font-size:11px;">{{ moduleForm.get('title')?.value?.length ?? 0 }}/20</span>
+          </div>
+          <input class="sf-input w-100" formControlName="title" placeholder="e.g. Introduction" maxlength="20"
+            [class.is-invalid]="moduleForm.get('title')?.invalid && moduleForm.get('title')?.touched" />
+          @if (moduleForm.get('title')?.invalid && moduleForm.get('title')?.touched) {
+            <div class="sf-field-error">Title is required (max 20 characters).</div>
+          }
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <label class="sf-label">Description <span class="text-danger">*</span></label>
+            <span class="sf-muted" style="font-size:11px;">{{ moduleForm.get('description')?.value?.length ?? 0 }}/50</span>
+          </div>
+          <textarea class="sf-input w-100" rows="2" formControlName="description"
+            placeholder="Brief overview of this module…" maxlength="50"
+            [class.is-invalid]="moduleForm.get('description')?.invalid && moduleForm.get('description')?.touched"></textarea>
+          @if (moduleForm.get('description')?.invalid && moduleForm.get('description')?.touched) {
+            <div class="sf-field-error">Description is required (max 50 characters).</div>
+          }
+        </div>
+        <div class="mb-3">
+          <label class="sf-label">Duration (hours) <span class="text-danger">*</span></label>
+          <input type="number" class="sf-input w-100" formControlName="duration" min="1" max="100" step="1"
+            [class.is-invalid]="moduleForm.get('duration')?.invalid && moduleForm.get('duration')?.touched" />
+          @if (moduleForm.get('duration')?.invalid && moduleForm.get('duration')?.touched) {
+            <div class="sf-field-error">Duration must be between 1 and 100 hours.</div>
+          }
+        </div>
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="sf-btn-ghost" (click)="closeModules()">Done</button>
+          <button type="submit" class="sf-btn-primary" [disabled]="addModuleLoading()">
+            @if (addModuleLoading()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            <i class="bi bi-plus me-1"></i>Add Module
+          </button>
+        </div>
+      </form>
+      } @else {
+        <div class="d-flex justify-content-end">
+          <button type="button" class="sf-btn-ghost" (click)="closeModules()">Close</button>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- Delete Module Confirmation Modal -->
+@if (showModuleDeleteModal() && moduleToDelete()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeDeleteModule()">
+  <div class="sf-modal" style="max-width:400px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-trash me-2" style="color:var(--sf-danger);"></i>Delete Module</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeDeleteModule()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+      <p class="mb-1">Are you sure you want to delete:</p>
+      <p class="fw-semibold fs-6 mb-3">"{{ moduleToDelete()!.title }}"</p>
+      <p class="sf-muted small mb-4">This action is permanent and cannot be undone.</p>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeDeleteModule()">Cancel</button>
+        <button type="button" class="sf-btn-primary"
+          style="background:var(--sf-danger);border-color:var(--sf-danger);"
+          [disabled]="deleteModuleLoading()" (click)="confirmDeleteModule()">
+          @if (deleteModuleLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          <i class="bi bi-trash me-1"></i>Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+

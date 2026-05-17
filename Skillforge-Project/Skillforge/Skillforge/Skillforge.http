@@ -1,0 +1,106 @@
+# @Skillforge_HostAddress = http://localhost:5145
+
+# # ──────────────────────────────────────────────────────────────
+# # STEP 1: Login to obtain a JWT token.
+# # Copy the token from the response and paste it into @aliceToken /
+# # @adminToken / @bobToken below, then run the notification tests.
+# # ──────────────────────────────────────────────────────────────
+
+# ### Login as Alice (Employee — has 2 unread: Certification + Enrollment)
+# POST {{Skillforge_HostAddress}}/api/v1/User/login
+# Content-Type: application/json
+
+# {
+#   "email": "alice@skillforge.com",
+#   "password": "Admin@123"
+# }
+
+# ###
+
+# ### Login as Admin (has 1 unread: Report)
+# POST {{Skillforge_HostAddress}}/api/v1/User/login
+# Content-Type: application/json
+
+# {
+#   "email": "admin@skillforge.com",
+#   "password": "Admin@123"
+# }
+
+# ###
+
+# ### Login as Bob (has 0 unread — only row is Status='Read')
+# POST {{Skillforge_HostAddress}}/api/v1/User/login
+# Content-Type: application/json
+
+# {
+#   "email": "bob@skillforge.com",
+#   "password": "Admin@123"
+# }
+
+# ###
+
+# # ──────────────────────────────────────────────────────────────
+# # Paste JWT tokens from the login responses above.
+# # ──────────────────────────────────────────────────────────────
+# @aliceToken = <paste Alice JWT here>
+# @adminToken = <paste Admin JWT here>
+# @bobToken   = <paste Bob JWT here>
+
+# # ──────────────────────────────────────────────────────────────
+# # NOTIFICATION TESTS
+# # ──────────────────────────────────────────────────────────────
+
+# ### [200] Alice — all unread (expect 2: Certification + Enrollment)
+# GET {{Skillforge_HostAddress}}/api/v1/notification
+# Accept: application/json
+# Authorization: Bearer {{aliceToken}}
+
+# ###
+
+# ### [200] Alice — filter by Certification (expect 1)
+# GET {{Skillforge_HostAddress}}/api/v1/notification?category=Certification
+# Accept: application/json
+# Authorization: Bearer {{aliceToken}}
+
+# ###
+
+# ### [200] Alice — filter by Enrollment (expect 1)
+# GET {{Skillforge_HostAddress}}/api/v1/notification?category=Enrollment
+# Accept: application/json
+# Authorization: Bearer {{aliceToken}}
+
+# ###
+
+# ### [200] Alice — filter by Report (expect 0 — no Report notifications for Alice)
+# GET {{Skillforge_HostAddress}}/api/v1/notification?category=Report
+# Accept: application/json
+# Authorization: Bearer {{aliceToken}}
+
+# ###
+
+# ### [200] Admin — all unread (expect 1: Report)
+# GET {{Skillforge_HostAddress}}/api/v1/notification
+# Accept: application/json
+# Authorization: Bearer {{adminToken}}
+
+# ###
+
+# ### [200] Admin — filter by Report (expect 1)
+# GET {{Skillforge_HostAddress}}/api/v1/notification?category=Report
+# Accept: application/json
+# Authorization: Bearer {{adminToken}}
+
+# ###
+
+# ### [200] Bob — all unread (expect 0 — his only row is Status='Read')
+# GET {{Skillforge_HostAddress}}/api/v1/notification
+# Accept: application/json
+# Authorization: Bearer {{bobToken}}
+
+# ###
+
+# ### [401] No token — expect 401 Unauthorized
+# GET {{Skillforge_HostAddress}}/api/v1/notification
+# Accept: application/json
+
+# ###

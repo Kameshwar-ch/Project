@@ -1,0 +1,218 @@
+<div class="sf-page fade-in">
+
+  <!-- Header -->
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb sf-breadcrumb mb-1">
+          <li class="breadcrumb-item sf-muted">Home</li>
+          <li class="breadcrumb-item">
+            <a routerLink="/catalog" class="sf-link">Training Catalog</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a [routerLink]="['/catalog', courseId(), 'modules']" class="sf-link"
+              [state]="{ course: course(), enrollmentId: enrollmentId() }">
+              {{ course()?.title ?? 'Modules' }}
+            </a>
+          </li>
+          <li class="breadcrumb-item active">{{ module()?.title ?? 'Module' }}</li>
+        </ol>
+      </nav>
+      <h2 class="sf-page-title">{{ module()?.title ?? 'Module Details' }}</h2>
+    </div>
+    <button class="sf-btn-ghost" type="button" (click)="back()">
+      <i class="bi bi-arrow-left me-1"></i>Back to Modules
+    </button>
+  </div>
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+      <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+      {{ toast() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <app-spinner></app-spinner>
+  } @else {
+
+    <div class="row g-3">
+
+      <!-- Left: Module Info + Completion -->
+      <div class="col-md-7">
+        <div class="sf-card h-100 d-flex flex-column">
+          <div class="d-flex align-items-start justify-content-between mb-3">
+            <div class="sf-card-title mb-0">
+              <i class="bi bi-journal-text me-2"></i>Module Details
+            </div>
+            @if (isCompleted()) {
+              <span class="badge" style="background:var(--sf-success,#28a745);font-size:13px;padding:6px 12px;">
+                <i class="bi bi-check-circle-fill me-1"></i>Completed
+              </span>
+            }
+          </div>
+
+          @if (module()) {
+            <div class="mb-4">
+              <div class="sf-muted small mb-1">Title</div>
+              <div class="fw-semibold fs-5">{{ module()!.title }}</div>
+            </div>
+
+            <div class="mb-4">
+              <div class="sf-muted small mb-1">Content / Description</div>
+              <div class="p-3 rounded" style="background:var(--sf-bg);border:1px solid var(--sf-border);">
+                {{ module()!.contentURI || 'No description provided for this module.' }}
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <div class="sf-muted small mb-1">Estimated Duration</div>
+              <div class="fw-semibold">
+                <i class="bi bi-clock me-1"></i>{{ module()!.duration }} hour{{ module()!.duration !== 1 ? 's' : '' }}
+              </div>
+            </div>
+          } @else {
+            <p class="sf-muted">Module data not available.</p>
+          }
+
+          <!-- Mark Complete gate -->
+          <div class="mt-auto pt-3" style="border-top:1px solid var(--sf-border);">
+            @if (isCompleted()) {
+              <div class="d-flex align-items-center gap-2" style="color:var(--sf-success,#28a745);">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <span class="fw-semibold">You have completed this module.</span>
+              </div>
+
+            } @else if (assessments().length > 0 && !allAssessmentsPassed()) {
+              <!-- Blocked: has assessments not yet all passed -->
+              <div class="p-3 rounded mb-3"
+                style="background:#fff3cd;border:1px solid #ffc107;">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                  <i class="bi bi-exclamation-triangle-fill" style="color:#856404;margin-top:2px;"></i>
+                  <div>
+                    <div class="fw-semibold" style="color:#856404;">Complete all assessments first</div>
+                    <div class="small" style="color:#856404;">
+                      You must pass all assessments for this module before marking it as complete.
+                    </div>
+                  </div>
+                </div>
+                <!-- List unpassed assessments -->
+                <ul class="mb-0 ps-4" style="color:#856404;font-size:13px;">
+                  @for (a of unpassed(); track a.assessmentId) {
+                    <li>
+                      {{ a.type }}
+                      @if (!a.isDone) {
+                        <span class="badge bg-secondary ms-1" style="font-size:10px;">Not submitted</span>
+                      } @else if (a.resultStatus === 'Pending') {
+                        <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">Awaiting review</span>
+                      } @else if (a.resultStatus === 'Fail') {
+                        <span class="badge bg-danger ms-1" style="font-size:10px;">Failed</span>
+                      }
+                    </li>
+                  }
+                </ul>
+              </div>
+              <button class="sf-btn-primary" type="button" (click)="goToAssessments()">
+                <i class="bi bi-clipboard-check me-2"></i>Go to Assessments
+              </button>
+
+            } @else {
+              <!-- All assessments passed (or no assessments) — allow marking complete -->
+              @if (assessments().length > 0) {
+                <div class="d-flex align-items-center gap-2 mb-3 p-2 rounded"
+                  style="background:#d4edda;border:1px solid #c3e6cb;">
+                  <i class="bi bi-check-circle-fill" style="color:#155724;"></i>
+                  <span class="small fw-semibold" style="color:#155724;">
+                    All assessments passed! You can now mark this module as complete.
+                  </span>
+                </div>
+              }
+              <button class="sf-btn-primary" type="button"
+                [disabled]="markingDone()"
+                (click)="markComplete()">
+                @if (markingDone()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                } @else {
+                  <i class="bi bi-check2-circle me-2"></i>
+                }Mark Module as Complete
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Assessments for this module -->
+      <div class="col-md-5">
+        <div class="sf-card h-100">
+          <div class="sf-card-title mb-3">
+            <i class="bi bi-clipboard-check me-2"></i>Module Assessments
+          </div>
+
+          @if (assessments().length === 0) {
+            <div class="text-center py-5 sf-muted">
+              <i class="bi bi-clipboard fs-2 d-block mb-2"></i>
+              No assessments assigned to this module yet.
+              <div class="small mt-2">You can mark this module as complete directly.</div>
+            </div>
+          } @else {
+            <div class="d-flex flex-column gap-2 mb-4">
+              @for (a of assessments(); track a.assessmentId) {
+                <div class="p-3 rounded d-flex align-items-center gap-3"
+                  style="border:1px solid var(--sf-border);background:var(--sf-bg);">
+
+                  <!-- Type icon -->
+                  <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                    style="width:38px;height:38px;background:var(--sf-primary);">
+                    <i class="bi text-white"
+                      [ngClass]="{
+                        'bi-question-circle': a.type === 'Quiz',
+                        'bi-file-text':       a.type === 'Exam',
+                        'bi-tools':           a.type === 'Practical'
+                      }"></i>
+                  </div>
+
+                  <div class="flex-grow-1 min-w-0">
+                    <div class="fw-semibold small">{{ a.type }}</div>
+                    <div class="sf-muted" style="font-size:11px;">
+                      Max score: {{ a.maxScore }}
+                      @if (a.score != null) {
+                        &middot; Your score: <strong>{{ a.score }}</strong>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Status badge -->
+                  @if (a.resultStatus === 'Pass') {
+                    <span class="badge" style="background:var(--sf-success,#28a745);">
+                      <i class="bi bi-check-lg me-1"></i>Pass
+                    </span>
+                  } @else if (a.resultStatus === 'Fail') {
+                    <span class="badge bg-danger">Fail</span>
+                  } @else if (a.resultStatus === 'Pending') {
+                    <span class="badge bg-warning text-dark">Pending</span>
+                  } @else {
+                    <span class="badge" style="background:var(--sf-primary);">Open</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- CTA -->
+            <div class="p-3 rounded text-center"
+              style="border:1px dashed var(--sf-primary);background:var(--sf-bg);">
+              <p class="sf-muted small mb-2">
+                Submit your assessment scores on the Assessments page. A trainer will then review and mark them as Pass or Fail.
+              </p>
+              <button class="sf-btn-primary" type="button" (click)="goToAssessments()">
+                <i class="bi bi-clipboard-check me-2"></i>Go to Assessments
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+
+  }
+</div>

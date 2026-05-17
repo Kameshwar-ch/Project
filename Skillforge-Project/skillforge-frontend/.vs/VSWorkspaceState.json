@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\app",
+    "\\src\\app\\core",
+    "\\src\\app\\core\\models",
+    "\\src\\app\\core\\services",
+    "\\src\\app\\pages",
+    "\\src\\app\\pages\\assessments",
+    "\\src\\app\\pages\\catalog",
+    "\\src\\app\\pages\\catalog\\course-modules"
+  ],
+  "SelectedNode": "\\src\\app\\pages\\assessments\\assessments.html",
+  "PreviewInSolutionExplorer": false
+}

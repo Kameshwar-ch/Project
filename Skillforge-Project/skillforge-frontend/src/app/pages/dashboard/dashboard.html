@@ -1,0 +1,238 @@
+<div class="sf-page fade-in">
+  <!-- Header -->
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb sf-breadcrumb mb-1">
+          <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+      </nav>
+      <h2 class="sf-page-title">
+        Good day, {{ userName() }}
+      </h2>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-spinner></app-spinner>
+  } @else {
+
+  <!-- KPI Row -->
+  <div class="row g-3 mb-4">
+    <!-- Card 1: Available / My Courses (all roles) -->
+    <div class="col-md-4">
+      <a routerLink="/catalog" class="text-decoration-none d-block h-100" style="cursor:pointer;">
+        <app-kpi-card
+          [title]="isTrainer ? 'My Courses' : 'Available Courses'"
+          [value]="courseCount()"
+          [subtitle]="isTrainer ? 'Courses you teach' : 'Live courses in catalog'"
+          icon="bi-collection-fill"
+          trend="Browse catalog →"
+          [trendUp]="true">
+        </app-kpi-card>
+      </a>
+    </div>
+
+    <!-- Card 2: Role-specific -->
+    <div class="col-md-4">
+      @if (isEmployee) {
+        <a routerLink="/assessments" class="text-decoration-none d-block h-100" style="cursor:pointer;">
+          <app-kpi-card
+            title="My Certifications"
+            [value]="certTotal()"
+            subtitle="Earned so far"
+            icon="bi-patch-check-fill"
+            trend="View certifications →"
+            [trendUp]="true">
+          </app-kpi-card>
+        </a>
+      } @else if (isTrainer) {
+        <a routerLink="/assessments" class="text-decoration-none d-block h-100" style="cursor:pointer;">
+          <app-kpi-card
+            title="Pending Reviews"
+            [value]="pendingReviews()"
+            subtitle="Assessments to evaluate"
+            icon="bi-clipboard-check"
+            trend="Go to assessments →"
+            [trendUp]="pendingReviews() === 0">
+          </app-kpi-card>
+        </a>
+      } @else {
+        <a routerLink="/enrollment" class="text-decoration-none d-block h-100" style="cursor:pointer;">
+          <app-kpi-card
+            title="Active Certifications"
+            [value]="certTotal()"
+            subtitle="Org-wide total"
+            icon="bi-patch-check-fill"
+            trend="View enrollments →"
+            [trendUp]="true">
+          </app-kpi-card>
+        </a>
+      }
+    </div>
+
+    <!-- Card 3: Role-specific -->
+    <div class="col-md-4">
+      @if (isEmployee) {
+        <a routerLink="/enrollment" class="text-decoration-none d-block h-100" style="cursor:pointer;">
+          <app-kpi-card
+            title="Enrolled Courses"
+            [value]="myEnrolled()"
+            subtitle="Currently in progress"
+            icon="bi-journal-bookmark-fill"
+            trend="View my enrollments →"
+            [trendUp]="true">
+          </app-kpi-card>
+        </a>
+      } @else if (isTrainer) {
+        <a routerLink="/notifications" class="text-decoration-none d-block h-100" style="cursor:pointer;">
+          <app-kpi-card
+            title="Notifications"
+            [value]="notifCount()"
+            subtitle="Unread"
+            icon="bi-bell-fill"
+            trend="View notifications →"
+            [trendUp]="notifCount() === 0">
+          </app-kpi-card>
+        </a>
+      } @else {
+        <app-kpi-card
+          title="Completion Rate"
+          [value]="completionRate()"
+          subtitle="Team compliance"
+          icon="bi-graph-up"
+          [trend]="complianceTrend()"
+          [trendUp]="true">
+        </app-kpi-card>
+      }
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="row g-3">
+    <!-- Quick Actions -->
+    <div class="col-md-5">
+      <div class="sf-card">
+        <div class="sf-card-title">
+          <i class="bi bi-lightning-charge-fill text-warning"></i>
+          Quick Actions
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          @if (isEmployee) {
+            <a routerLink="/catalog" class="sf-btn-primary">
+              <i class="bi bi-plus-circle me-1"></i>Enroll in Course
+            </a>
+          }
+          @if (isTrainer) {
+            <a routerLink="/catalog" class="sf-btn-primary">
+              <i class="bi bi-plus-square me-1"></i>Create Course
+            </a>
+            <a routerLink="/assessments" class="sf-btn-outline">
+              <i class="bi bi-clipboard-plus me-1"></i>New Assessment
+            </a>
+          }
+          @if (isManager) {
+            <a routerLink="/enrollment" class="sf-btn-primary">
+              <i class="bi bi-people me-1"></i>Assign Training
+            </a>
+            <a routerLink="/reports" class="sf-btn-outline">
+              <i class="bi bi-graph-up me-1"></i>Team Report
+            </a>
+          }
+          @if (isHR) {
+            <a routerLink="/compliance" class="sf-btn-primary">
+              <i class="bi bi-shield-check me-1"></i>Compliance Check
+            </a>
+            <a routerLink="/reports" class="sf-btn-outline">
+              <i class="bi bi-file-earmark-bar-graph me-1"></i>Run Report
+            </a>
+          }
+          @if (isAdmin) {
+            <a routerLink="/iam" class="sf-btn-primary">
+              <i class="bi bi-people-fill me-1"></i>Manage Users
+            </a>
+            <a routerLink="/catalog" class="sf-btn-outline">
+              <i class="bi bi-collection me-1"></i>Manage Catalog
+            </a>
+          }
+          <a routerLink="/catalog" class="sf-btn-ghost">
+            <i class="bi bi-search me-1"></i>Browse Catalog
+          </a>
+          <a routerLink="/assessments" class="sf-btn-ghost">
+            <i class="bi bi-patch-check me-1"></i>My Certifications
+          </a>
+        </div>
+
+        <!-- Notification count chip -->
+        @if (notifCount() > 0) {
+          <div class="mt-4 d-flex align-items-center gap-2">
+            <a routerLink="/notifications" class="sf-chip d-inline-flex align-items-center gap-1 text-decoration-none">
+              <i class="bi bi-bell-fill"></i>
+              {{ notifCount() }} unread notification{{ notifCount() !== 1 ? 's' : '' }}
+            </a>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="col-md-7">
+      <div class="sf-card h-100">
+        <div class="sf-card-title">
+          <i class="bi bi-calendar3 text-primary"></i>
+          Upcoming Events
+        </div>
+        <div class="table-responsive mt-2">
+          @if (upcomingEvents().length === 0) {
+            <p class="sf-muted mt-3">No upcoming events.</p>
+          } @else {
+          <table class="table sf-table mb-0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Course</th>
+                <th>Type</th>
+                <th>Detail</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ev of upcomingEvents(); track ev.id) {
+                <tr class="sf-table-row">
+                  <td class="sf-muted" style="white-space:nowrap;">{{ ev.date }}</td>
+                  <td class="fw-semibold">{{ ev.course }}</td>
+                  <td>
+                    @if (ev.label === 'Assessment') {
+                      <span class="sf-chip" style="background:#fef3c7;color:#92400e;">
+                        <i class="bi bi-clipboard-check me-1"></i>Assessment
+                      </span>
+                    } @else if (ev.label === 'Start Module') {
+                      <span class="sf-chip" style="background:#dbeafe;color:#1e40af;">
+                        <i class="bi bi-play-circle me-1"></i>Start Module
+                      </span>
+                    } @else if (ev.label === 'Course Completion') {
+                      <span class="sf-chip" style="background:#d1fae5;color:#065f46;">
+                        <i class="bi bi-patch-check me-1"></i>Completion
+                      </span>
+                    } @else {
+                      <span class="sf-chip">
+                        <i class="bi bi-person-check me-1"></i>Enrolled
+                      </span>
+                    }
+                  </td>
+                  <td class="sf-muted" style="font-size:12px;">{{ ev.detail }}</td>
+                  <td>
+                    <a [routerLink]="ev.link" class="sf-btn-sm">Go</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  } <!-- end else -->
+</div>

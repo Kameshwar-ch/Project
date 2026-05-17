@@ -1,0 +1,367 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\assessments\\assessments.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\assessments\\assessments.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\course-modules\\course-modules.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\catalog\\course-modules\\course-modules.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\models\\index.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\core\\models\\index.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\services\\auth.service.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\core\\services\\auth.service.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\auth\\forgot-password\\forgot-password.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\auth\\forgot-password\\forgot-password.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\catalog.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\catalog\\catalog.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\competency\\competency.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\competency\\competency.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\competency\\competency.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\competency\\competency.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\reports\\reports.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\reports\\reports.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\reports\\reports.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\reports\\reports.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\compliance\\compliance.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\compliance\\compliance.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\services\\compliance.service.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\core\\services\\compliance.service.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\compliance\\compliance.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\compliance\\compliance.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\notifications\\notifications.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\notifications\\notifications.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\enrollment\\enrollment.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\enrollment\\enrollment.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\assessments\\assessments.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\assessments\\assessments.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\dashboard\\dashboard.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\dashboard\\dashboard.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\module-detail\\module-detail.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\catalog\\module-detail\\module-detail.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\catalog.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\catalog\\catalog.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\iam\\iam.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\app\\pages\\iam\\iam.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "course-modules.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\course-modules\\course-modules.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\catalog\\course-modules\\course-modules.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\course-modules\\course-modules.ts",
+              "RelativeToolTip": "src\\app\\pages\\catalog\\course-modules\\course-modules.ts",
+              "ViewState": "AgIAABoAAAAAAAAAAAAswDYAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-17T06:27:28.601Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "auth.service.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\services\\auth.service.ts",
+              "RelativeDocumentMoniker": "src\\app\\core\\services\\auth.service.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\services\\auth.service.ts",
+              "RelativeToolTip": "src\\app\\core\\services\\auth.service.ts",
+              "ViewState": "AgIAACwAAAAAAAAAAAAAwEMAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-17T06:07:49.334Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "forgot-password.html",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.html",
+              "RelativeDocumentMoniker": "src\\app\\pages\\auth\\forgot-password\\forgot-password.html",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.html",
+              "RelativeToolTip": "src\\app\\pages\\auth\\forgot-password\\forgot-password.html",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAAD8AAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-17T05:56:59.904Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "forgot-password.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\auth\\forgot-password\\forgot-password.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.ts",
+              "RelativeToolTip": "src\\app\\pages\\auth\\forgot-password\\forgot-password.ts",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAADYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-17T05:55:57.25Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "assessments.html",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\assessments\\assessments.html",
+              "RelativeDocumentMoniker": "src\\app\\pages\\assessments\\assessments.html",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\assessments\\assessments.html",
+              "RelativeToolTip": "src\\app\\pages\\assessments\\assessments.html",
+              "ViewState": "AgIAADsAAAAAAAAAAAAmwFgAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-16T17:16:33.529Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "reports.html",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\reports\\reports.html",
+              "RelativeDocumentMoniker": "src\\app\\pages\\reports\\reports.html",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\reports\\reports.html",
+              "RelativeToolTip": "src\\app\\pages\\reports\\reports.html",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-16T21:30:51.165Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "reports.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\reports\\reports.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\reports\\reports.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\reports\\reports.ts",
+              "RelativeToolTip": "src\\app\\pages\\reports\\reports.ts",
+              "ViewState": "AgIAADMAAAAAAAAAAAAYwEAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T21:31:12.702Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "index.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\models\\index.ts",
+              "RelativeDocumentMoniker": "src\\app\\core\\models\\index.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\models\\index.ts",
+              "RelativeToolTip": "src\\app\\core\\models\\index.ts",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAuwAwAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T17:15:48.683Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "competency.html",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\competency\\competency.html",
+              "RelativeDocumentMoniker": "src\\app\\pages\\competency\\competency.html",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\competency\\competency.html",
+              "RelativeToolTip": "src\\app\\pages\\competency\\competency.html",
+              "ViewState": "AgIAANUAAAAAAAAAAAAAAO0AAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-16T21:45:48.155Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "compliance.html",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\compliance\\compliance.html",
+              "RelativeDocumentMoniker": "src\\app\\pages\\compliance\\compliance.html",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\compliance\\compliance.html",
+              "RelativeToolTip": "src\\app\\pages\\compliance\\compliance.html",
+              "ViewState": "AgIAABcBAAAAAAAAAAAmwDUBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-16T21:21:43.835Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "compliance.service.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\services\\compliance.service.ts",
+              "RelativeDocumentMoniker": "src\\app\\core\\services\\compliance.service.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\core\\services\\compliance.service.ts",
+              "RelativeToolTip": "src\\app\\core\\services\\compliance.service.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T21:20:41.267Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "catalog.html",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\catalog.html",
+              "RelativeDocumentMoniker": "src\\app\\pages\\catalog\\catalog.html",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\catalog.html",
+              "RelativeToolTip": "src\\app\\pages\\catalog\\catalog.html",
+              "ViewState": "AgIAAH4AAAAAAAAAAAAAAJAAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-16T18:33:41.268Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "compliance.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\compliance\\compliance.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\compliance\\compliance.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\compliance\\compliance.ts",
+              "RelativeToolTip": "src\\app\\pages\\compliance\\compliance.ts",
+              "ViewState": "AgIAAIgAAAAAAAAAAAAAAJUAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T21:19:11.73Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "competency.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\competency\\competency.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\competency\\competency.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\competency\\competency.ts",
+              "RelativeToolTip": "src\\app\\pages\\competency\\competency.ts",
+              "ViewState": "AgIAAH8AAAAAAAAAAADwv4wAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T20:49:46.791Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "notifications.html",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\notifications\\notifications.html",
+              "RelativeDocumentMoniker": "src\\app\\pages\\notifications\\notifications.html",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\notifications\\notifications.html",
+              "RelativeToolTip": "src\\app\\pages\\notifications\\notifications.html",
+              "ViewState": "AgIAAIoAAAAAAAAAAAAAAJ8AAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-16T20:28:53.165Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "module-detail.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\module-detail\\module-detail.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\catalog\\module-detail\\module-detail.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\module-detail\\module-detail.ts",
+              "RelativeToolTip": "src\\app\\pages\\catalog\\module-detail\\module-detail.ts",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAAwHYAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T19:32:24.429Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "enrollment.html",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\enrollment\\enrollment.html",
+              "RelativeDocumentMoniker": "src\\app\\pages\\enrollment\\enrollment.html",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\enrollment\\enrollment.html",
+              "RelativeToolTip": "src\\app\\pages\\enrollment\\enrollment.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-05-16T18:38:18.588Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "assessments.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\assessments\\assessments.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\assessments\\assessments.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\assessments\\assessments.ts",
+              "RelativeToolTip": "src\\app\\pages\\assessments\\assessments.ts",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAwwFUAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T16:45:59.154Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "dashboard.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\dashboard\\dashboard.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\dashboard\\dashboard.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\dashboard\\dashboard.ts",
+              "RelativeToolTip": "src\\app\\pages\\dashboard\\dashboard.ts",
+              "ViewState": "AgIAAKIAAAAAAAAAAAAQwLkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T18:07:19.845Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "catalog.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\catalog.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\catalog\\catalog.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\catalog\\catalog.ts",
+              "RelativeToolTip": "src\\app\\pages\\catalog\\catalog.ts",
+              "ViewState": "AgIAAMkAAAAAAAAAAAAswNkAAABZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T17:46:50.347Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "iam.ts",
+              "DocumentMoniker": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\iam\\iam.ts",
+              "RelativeDocumentMoniker": "src\\app\\pages\\iam\\iam.ts",
+              "ToolTip": "C:\\Final Project\\Skillforge-Project\\skillforge-frontend\\src\\app\\pages\\iam\\iam.ts",
+              "RelativeToolTip": "src\\app\\pages\\iam\\iam.ts",
+              "ViewState": "AgIAABQAAAAAAAAAAAAAwCoAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-05-16T14:30:20.309Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

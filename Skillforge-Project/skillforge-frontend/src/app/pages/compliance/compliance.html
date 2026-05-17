@@ -1,0 +1,309 @@
+<div class="sf-page fade-in">
+
+  <!-- Toast -->
+  @if (toast()) {
+  <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+    <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+    {{ toast() }}
+  </div>
+  }
+
+  <!-- Header -->
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb sf-breadcrumb mb-1">
+          <li class="breadcrumb-item sf-muted">Home</li>
+          <li class="breadcrumb-item active">Compliance & Audit</li>
+        </ol>
+      </nav>
+      <h2 class="sf-page-title">Compliance & Audit</h2>
+    </div>
+    @if (isHR) {
+    <button class="sf-btn-primary" (click)="runComplianceCheck()" [disabled]="refreshLoading()">
+      @if (refreshLoading()) {
+      <span class="spinner-border spinner-border-sm me-1"></span>Running...
+      } @else {
+      <i class="bi bi-shield-check me-1"></i>Run Compliance Check
+      }
+    </button>
+    }
+  </div>
+
+  <!-- Stat cards (HR only) -->
+  @if (isHR) {
+  @if (summary()) {
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="sf-card text-center py-3">
+        <div class="fs-3 fw-bold text-cyan">{{ summary()!.totalEmployees }}</div>
+        <div class="sf-muted small">Total Employees</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="sf-card text-center py-3">
+        <div class="fs-3 fw-bold text-success">{{ summary()!.compliantCount }}</div>
+        <div class="sf-muted small">Compliant</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="sf-card text-center py-3">
+        <div class="fs-3 fw-bold text-danger">{{ summary()!.nonCompliantCount }}</div>
+        <div class="sf-muted small">Non-Compliant</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="sf-card text-center py-3">
+        <div class="fs-3 fw-bold text-warning">{{ summary()!.complianceRate | number:'1.0-1' }}%</div>
+        <div class="sf-muted small">Compliance Rate</div>
+      </div>
+    </div>
+  </div>
+  }
+  }
+
+  <div class="row g-3">
+
+    <!-- Compliance Records (HR only) -->
+    @if (isHR) {
+    <div class="col-md-6">
+      <div class="sf-card h-100">
+        <div class="sf-card-title mb-2"><i class="bi bi-shield-check me-2"></i>Compliance Records</div>
+
+        <!-- Filter bar -->
+        <div class="d-flex gap-2 align-items-center flex-wrap mb-2">
+          <div class="sf-input-group" style="max-width:200px;">
+            <span class="sf-input-icon"><i class="bi bi-search"></i></span>
+            <input class="sf-input" placeholder="Search employee…"
+                   [ngModel]="employeeSearch()" (ngModelChange)="employeeSearch.set($event)" />
+          </div>
+          <select class="sf-select" style="width:auto;"
+                  [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+            <option>All</option>
+            <option>Compliant</option>
+            <option>Non-Compliant</option>
+          </select>
+          <button class="sf-btn-ghost" type="button" (click)="resetFilters()">
+            <i class="bi bi-x-circle me-1"></i>Reset
+          </button>
+        </div>
+
+        @if (complianceLoading()) {
+        <div class="text-center py-4"><app-spinner></app-spinner></div>
+        } @else if (!summary() || filteredRecords.length === 0) {
+        <p class="sf-muted text-center py-4 mb-0">No compliance records found.</p>
+        } @else {
+        <div class="mt-2">
+          @for (group of employeeGroups; track group.employeeId) {
+          <div class="sf-table-row d-flex align-items-center gap-2 px-2 py-2 rounded mb-1"
+               style="cursor:pointer; border:1px solid var(--sf-border);"
+               (click)="toggleEmployee(group.employeeId)">
+            <i class="bi"
+               [ngClass]="expandedEmployee() === group.employeeId ? 'bi-chevron-down' : 'bi-chevron-right'"
+               style="font-size:0.75rem;"></i>
+            <span class="fw-semibold flex-grow-1">{{ group.employeeName }}</span>
+            <span class="sf-muted small me-2">
+              {{ group.compliantCount }}/{{ group.records.length }} compliant
+            </span>
+            <app-status-badge [status]="group.compliantCount === group.records.length ? 'Compliant' : 'Non-Compliant'">
+            </app-status-badge>
+          </div>
+
+          @if (expandedEmployee() === group.employeeId) {
+          <div class="ms-4 mb-2">
+            <table class="table sf-table mb-0" style="font-size:0.85rem;">
+              <thead><tr><th>Course</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody>
+                @for (r of group.records; track r.complianceId) {
+                <tr class="sf-table-row">
+                  <td>{{ r.courseName }}</td>
+                  <td><app-status-badge [status]="complianceStatus(r.status)"></app-status-badge></td>
+                  <td class="sf-muted">{{ r.date | date:'mediumDate' }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          }
+          }
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Audit Records (Admin or HR) -->
+    @if (isAdminOrHR) {
+    <div [class]="isHR ? 'col-md-6' : 'col-12'">
+      <div class="sf-card h-100">
+        <div class="sf-card-title d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-file-earmark-check me-2"></i>Audit Records</span>
+          @if (isHR) {
+          <button class="sf-btn-sm sf-btn-sm-primary" type="button" (click)="openCreateAudit()">
+            <i class="bi bi-plus me-1"></i>New Audit
+          </button>
+          }
+        </div>
+
+        <!-- Audit filters -->
+        <div class="d-flex gap-2 align-items-center flex-wrap mb-2 mt-2">
+          <select class="sf-select" style="width:auto;"
+                  [ngModel]="auditScopeFilter()" (ngModelChange)="auditScopeFilter.set($event)">
+            <option value="All">All Scopes</option>
+            <option value="Course">Course</option>
+            <option value="Employee">Employee</option>
+            <option value="Department">Department</option>
+          </select>
+          <select class="sf-select" style="width:auto;"
+                  [ngModel]="auditStatusFilter()" (ngModelChange)="auditStatusFilter.set($event)">
+            <option value="All">All Statuses</option>
+            <option value="Pass">Pass</option>
+            <option value="Fail">Fail</option>
+          </select>
+          <span class="sf-muted small ms-1">{{ filteredAudits.length }} record{{ filteredAudits.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        @if (auditLoading()) {
+        <div class="text-center py-4"><app-spinner></app-spinner></div>
+        } @else if (filteredAudits.length === 0) {
+        <p class="sf-muted text-center py-4 mb-0">No audit records found.</p>
+        } @else {
+        <div class="table-responsive mt-2">
+          <table class="table sf-table mb-0">
+            <thead>
+              <tr>
+                <th>Auditor</th>
+                <th>Scope</th>
+                <th>Findings</th>
+                <th>Date</th>
+                <th>Status</th>
+                @if (isHR) {
+                <th></th> }
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of filteredAudits; track a.auditID) {
+              <tr class="sf-table-row">
+                <td class="fw-semibold">{{ a.hrName }}</td>
+                <td><span class="sf-chip">{{ a.scope }}</span></td>
+                <td class="sf-muted" style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                    [title]="a.findings">
+                  {{ a.findings }}
+                </td>
+                <td class="sf-muted">{{ a.date | date:'mediumDate' }}</td>
+                <td>
+                  @if (a.status) {
+                  <span class="sf-chip" style="background:#d1fae5;color:#065f46;">
+                    <i class="bi bi-check-circle-fill me-1"></i>Pass
+                  </span>
+                  } @else {
+                  <span class="sf-chip" style="background:#fee2e2;color:#991b1b;">
+                    <i class="bi bi-x-circle-fill me-1"></i>Fail
+                  </span>
+                  }
+                </td>
+                @if (isHR) {
+                <td>
+                  <button class="sf-btn-sm" type="button" style="color:var(--sf-danger);"
+                          (click)="deleteAudit(a.auditID)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+                }
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- No access -->
+    @if (!isHR && !isAdminOrHR) {
+    <div class="col-12">
+      <div class="sf-card text-center py-5">
+        <i class="bi bi-shield-lock fs-1 sf-muted"></i>
+        <p class="sf-muted mt-3 mb-0">You do not have permission to view compliance or audit data.</p>
+      </div>
+    </div>
+    }
+
+  </div>
+</div>
+
+
+<!-- ── Create Audit Modal ────────────────────────────────────────────── -->
+@if (showCreateAudit()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeCreateAudit()">
+  <div class="sf-modal" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-plus me-2"></i>New Audit</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeCreateAudit()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      <!-- Scope -->
+      <div class="mb-3">
+        <label class="sf-label">Scope <span class="text-danger">*</span></label>
+        <select class="sf-select w-100" [formControl]="auditForm.controls.scope"
+                [class.is-invalid]="auditForm.get('scope')?.invalid && auditForm.get('scope')?.touched">
+          <option value="" disabled>Select scope…</option>
+          <option value="Course">Course</option>
+          <option value="Employee">Employee</option>
+          <option value="Department">Department</option>
+        </select>
+        @if (auditForm.get('scope')?.invalid && auditForm.get('scope')?.touched) {
+        <div class="sf-field-error">Scope is required.</div>
+        }
+      </div>
+
+      <!-- Findings -->
+      <div class="mb-3">
+        <label class="sf-label">Findings <span class="text-danger">*</span></label>
+        <textarea class="sf-input w-100" rows="4" [formControl]="auditForm.controls.findings"
+                  placeholder="Describe your audit findings…"
+                  [class.is-invalid]="auditForm.get('findings')?.invalid && auditForm.get('findings')?.touched"></textarea>
+        @if (auditForm.get('findings')?.invalid && auditForm.get('findings')?.touched) {
+        <div class="sf-field-error">Findings are required (max 500 characters).</div>
+        }
+      </div>
+
+      <!-- Status -->
+      <div class="mb-4">
+        <label class="sf-label">Status <span class="text-danger">*</span></label>
+        <div class="d-flex gap-3">
+          <button type="button" class="sf-btn-outline flex-fill py-2"
+                  [style.border-color]="auditForm.value.status === true ? 'var(--sf-success, #059669)' : ''"
+                  [style.color]="auditForm.value.status === true ? 'var(--sf-success, #059669)' : ''"
+                  [style.background]="auditForm.value.status === true ? '#d1fae5' : ''"
+                  (click)="setAuditStatus(true)">
+            <i class="bi bi-check-circle-fill me-1"></i>Pass
+          </button>
+          <button type="button" class="sf-btn-outline flex-fill py-2"
+                  [style.border-color]="auditForm.value.status === false ? 'var(--sf-danger, #dc2626)' : ''"
+                  [style.color]="auditForm.value.status === false ? 'var(--sf-danger, #dc2626)' : ''"
+                  [style.background]="auditForm.value.status === false ? '#fee2e2' : ''"
+                  (click)="setAuditStatus(false)">
+            <i class="bi bi-x-circle-fill me-1"></i>Fail
+          </button>
+        </div>
+        @if (auditForm.get('status')?.invalid && auditForm.get('status')?.touched) {
+        <div class="sf-field-error mt-1">Status is required.</div>
+        }
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeCreateAudit()">Cancel</button>
+        <button type="button" class="sf-btn-primary" [disabled]="createAuditLoading()"
+                (click)="submitCreateAudit()">
+          @if (createAuditLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Create Audit
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+}

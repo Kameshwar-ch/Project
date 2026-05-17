@@ -1,0 +1,72 @@
+<header class="sf-topbar slide-in-down">
+  <!-- Mobile hamburger -->
+  <button class="sf-btn-ghost d-lg-none me-2" type="button"
+          data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+    <i class="bi bi-list fs-5"></i>
+  </button>
+
+  <!-- Title -->
+  <a routerLink="/dashboard" class="d-flex align-items-center gap-2 text-decoration-none" style="cursor:pointer;">
+    <div class="sf-logo-badge" style="width:22px;height:22px;border-radius:6px;"></div>
+    <span class="fw-bold d-none d-md-inline">SkillForge</span>
+  </a>
+
+  <div class="flex-grow-1"></div>
+
+  <!-- Actions -->
+  <div class="d-flex align-items-center gap-2">
+    <!-- Theme toggle -->
+    <button class="sf-btn-ghost" type="button" (click)="toggleTheme()" [title]="theme.theme() === 'dark' ? 'Switch to Light' : 'Switch to Dark'">
+      <i class="bi" [ngClass]="theme.theme() === 'dark' ? 'bi-sun' : 'bi-moon'"></i>
+    </button>
+
+    <!-- Notifications -->
+    <a routerLink="/notifications" title="Notifications"
+      style="position:relative;display:inline-flex;align-items:center;justify-content:center;
+             width:36px;height:36px;border-radius:8px;border:1px solid var(--sf-border);
+             background:transparent;color:var(--sf-text);text-decoration:none;
+             transition:background .15s;cursor:pointer;flex-shrink:0;"
+      onmouseenter="this.style.background='var(--sf-chip)'"
+      onmouseleave="this.style.background='transparent'">
+      <i class="bi bi-bell" style="font-size:16px;"></i>
+      @if (unreadCount() > 0) {
+        <span style="position:absolute;top:3px;right:3px;
+                     background:var(--sf-danger);color:#fff;
+                     font-size:9px;font-weight:700;line-height:1;
+                     min-width:15px;height:15px;border-radius:999px;
+                     display:flex;align-items:center;justify-content:center;
+                     padding:0 3px;pointer-events:none;
+                     box-shadow:0 0 0 2px var(--sf-panel);">
+          {{ unreadCount() > 99 ? '99+' : unreadCount() }}
+        </span>
+      }
+    </a>
+
+    <!-- User menu -->
+    <div class="dropdown">
+      <button class="sf-avatar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <div class="sf-avatar-sm">{{ (user()?.name ?? 'U')[0].toUpperCase() }}</div>
+        <span class="d-none d-md-inline small fw-semibold">{{ user()?.name }}</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end sf-dropdown-menu">
+        <li>
+          <span class="dropdown-item-text sf-muted" style="font-size:12px;">
+            {{ user()?.email }}
+          </span>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <a class="dropdown-item" routerLink="/profile">
+            <i class="bi bi-person-circle me-2"></i>My Profile
+          </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <button class="dropdown-item text-danger" type="button" (click)="logout()">
+            <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>

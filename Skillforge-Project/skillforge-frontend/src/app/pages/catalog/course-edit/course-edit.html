@@ -1,0 +1,123 @@
+<div class="sf-page fade-in">
+
+  <!-- Header -->
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb sf-breadcrumb mb-1">
+          <li class="breadcrumb-item sf-muted">Home</li>
+          <li class="breadcrumb-item">
+            <a routerLink="/catalog" class="sf-link">Training Catalog</a>
+          </li>
+          <li class="breadcrumb-item active">Edit Course</li>
+        </ol>
+      </nav>
+      <h2 class="sf-page-title">Edit Course</h2>
+    </div>
+    <button class="sf-btn-ghost" type="button" (click)="back()">
+      <i class="bi bi-arrow-left me-1"></i>Back to Catalog
+    </button>
+  </div>
+
+  @if (toast()) {
+    <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+      <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+      {{ toast() }}
+    </div>
+  }
+
+  @if (course()) {
+  <div class="row g-3 justify-content-center">
+    <div class="col-md-7">
+      <div class="sf-card">
+        <div class="sf-card-title mb-4">
+          <i class="bi bi-pencil-square me-2"></i>Course Details
+        </div>
+
+        <form [formGroup]="editForm" (ngSubmit)="submit()" novalidate>
+
+          <!-- Title -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between">
+              <label class="sf-label">Title <span class="text-danger">*</span></label>
+              <span class="sf-muted" style="font-size:11px;">
+                {{ editForm.get('title')?.value?.length ?? 0 }}/20
+              </span>
+            </div>
+            <input class="sf-input w-100" formControlName="title" maxlength="20"
+              placeholder="e.g. Secure Coding 101"
+              [class.is-invalid]="editForm.get('title')?.invalid && editForm.get('title')?.touched" />
+            @if (editForm.get('title')?.invalid && editForm.get('title')?.touched) {
+              <div class="sf-field-error">Title is required (max 20 characters).</div>
+            }
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between">
+              <label class="sf-label">Description <span class="text-danger">*</span></label>
+              <span class="sf-muted" style="font-size:11px;">
+                {{ editForm.get('description')?.value?.length ?? 0 }}/50
+              </span>
+            </div>
+            <textarea class="sf-input w-100" rows="3" formControlName="description" maxlength="50"
+              placeholder="Course overview…"
+              [class.is-invalid]="editForm.get('description')?.invalid && editForm.get('description')?.touched"></textarea>
+            @if (editForm.get('description')?.invalid && editForm.get('description')?.touched) {
+              <div class="sf-field-error">Description is required (max 50 characters).</div>
+            }
+          </div>
+
+          <!-- Duration & Status -->
+          <div class="row g-2 mb-3">
+            <div class="col">
+              <label class="sf-label">Duration (hours) <span class="text-danger">*</span></label>
+              <input type="number" class="sf-input w-100" formControlName="duration" min="1" max="100" step="1"
+                [class.is-invalid]="editForm.get('duration')?.invalid && editForm.get('duration')?.touched" />
+              @if (editForm.get('duration')?.invalid && editForm.get('duration')?.touched) {
+                <div class="sf-field-error">Duration must be between 1 and 100 hours.</div>
+              }
+            </div>
+            <div class="col">
+              <label class="sf-label">Status</label>
+              <select class="sf-select w-100" formControlName="status">
+                <option value="false">Draft</option>
+                <option value="true">Live</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Trainer (Admin only) -->
+          @if (isAdmin) {
+          <div class="mb-3">
+            <label class="sf-label">Assign Trainer <span class="text-danger">*</span></label>
+            <select class="sf-select w-100" formControlName="trainerID"
+              [class.is-invalid]="editForm.get('trainerID')?.invalid && editForm.get('trainerID')?.touched">
+              <option [ngValue]="null" disabled>Select a trainer…</option>
+              @for (t of trainers(); track t.userID) {
+                <option [ngValue]="t.userID">{{ t.userName }} (ID: {{ t.userID }})</option>
+              }
+            </select>
+            @if (editForm.get('trainerID')?.invalid && editForm.get('trainerID')?.touched) {
+              <div class="sf-field-error">Please select a trainer.</div>
+            }
+          </div>
+          }
+
+          <!-- Actions -->
+          <div class="d-flex gap-2 justify-content-end mt-4">
+            <button type="button" class="sf-btn-ghost" (click)="back()">Cancel</button>
+            <button type="submit" class="sf-btn-primary" [disabled]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              <i class="bi bi-check-lg me-1"></i>Save Changes
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+  }
+</div>

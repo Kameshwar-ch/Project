@@ -1,0 +1,42 @@
+<aside class="sf-sidebar slide-in-left">
+  <!-- Brand -->
+  <div class="sf-sidebar-brand">
+    <div class="sf-logo-badge"></div>
+    <div>
+      <span class="fw-bold fs-5">SkillForge</span>
+    </div>
+  </div>
+
+  <!-- Role badge -->
+  <div class="px-3 mb-3">
+    <span class="sf-chip d-inline-flex align-items-center gap-1">
+      <i class="bi bi-person-fill"></i>
+      {{ role() ?? 'User' }}
+    </span>
+  </div>
+
+  <!-- Nav -->
+  <nav class="sf-nav">
+    <p class="sf-section-title">Navigate</p>
+    @for (item of visibleItems; track item.path) {
+      <a [routerLink]="item.path"
+         routerLinkActive="active"
+         class="sf-nav-link">
+        <i class="bi {{ item.icon }}"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <!-- Divider -->
+  <div class="sf-sidebar-footer">
+    <p class="sf-section-title">Account</p>
+    <div class="sf-user-info">
+      <div class="sf-avatar">{{ (user()?.name ?? 'U')[0].toUpperCase() }}</div>
+      <div class="overflow-hidden">
+        <div class="fw-semibold text-truncate small">{{ user()?.name }}</div>
+        <div class="sf-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.05em">{{ role() }}</div>
+      </div>
+    </div>
+  </div>
+</aside>

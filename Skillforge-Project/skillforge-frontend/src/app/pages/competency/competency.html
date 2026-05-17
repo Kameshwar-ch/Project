@@ -1,0 +1,495 @@
+<div class="sf-page fade-in">
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb sf-breadcrumb mb-1">
+        <li class="breadcrumb-item sf-muted">Home</li>
+        <li class="breadcrumb-item active">Competency & Skill Gaps</li>
+      </ol></nav>
+      <h2 class="sf-page-title">Competency & Skill Gap Analysis</h2>
+    </div>
+    @if (isHR) {
+      <div class="d-flex gap-2">
+        <button class="sf-btn-primary" type="button" (click)="openCreateGap()">
+          <i class="bi bi-plus-lg me-1"></i>Add Skill Gap
+        </button>
+        <button class="sf-btn-outline" type="button" (click)="openCreateCompetency()">
+          <i class="bi bi-plus-lg me-1"></i>Add Competency
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+      <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+      {{ toast() }}
+    </div>
+  }
+
+  <!-- Filter bar -->
+  <div class="sf-card mb-3">
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <div class="sf-input-group" style="max-width:240px;">
+        <span class="sf-input-icon"><i class="bi bi-search"></i></span>
+        <input class="sf-input" placeholder="Search employee…"
+          [ngModel]="employeeSearch()" (ngModelChange)="employeeSearch.set($event)" />
+      </div>
+      <select class="sf-select" style="width:auto;"
+        [ngModel]="gapLevelFilter()" (ngModelChange)="gapLevelFilter.set($event)">
+        <option>All</option>
+        <option>High</option>
+        <option>Medium</option>
+        <option>Low</option>
+      </select>
+      <button class="sf-btn-ghost" type="button" (click)="resetFilters()">
+        <i class="bi bi-x-circle me-1"></i>Reset
+      </button>
+      <span class="sf-muted small ms-auto">
+        {{ filteredGaps.length }} gap{{ filteredGaps.length !== 1 ? 's' : '' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Competency Matrix -->
+    <div class="col-md-7">
+      <div class="sf-card h-100">
+        <div class="sf-card-title"><i class="bi bi-bar-chart-steps me-2"></i>Competency Matrix</div>
+
+        @if (loadingMatrix()) {
+          <app-spinner></app-spinner>
+        } @else if (matrixError()) {
+          <div class="alert alert-danger py-2 mt-2 mb-0">{{ matrixError() }}</div>
+        } @else {
+          <div class="table-responsive mt-2">
+            <table class="table sf-table mb-0">
+              <thead><tr><th>Employee</th><th>Skill</th><th>Level</th></tr></thead>
+              <tbody>
+                @for (entry of filteredMatrix; track entry.employeeId) {
+                  @for (skill of entry.skills; track skill.skillName) {
+                    <tr class="sf-table-row">
+                      <td class="fw-semibold">{{ entry.employeeName }}</td>
+                      <td class="sf-muted">{{ skill.skillName }}</td>
+                      <td><span class="sf-chip">{{ skill.level }}</span></td>
+                    </tr>
+                  }
+                } @empty {
+                  <tr><td colspan="3" class="text-center py-4 sf-muted">No competency data found.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Skill Gap Analysis -->
+    <div class="col-md-5">
+      <div class="sf-card h-100">
+        <div class="sf-card-title"><i class="bi bi-graph-up me-2"></i>Skill Gap Analysis</div>
+
+        @if (loadingGaps()) {
+          <app-spinner></app-spinner>
+        } @else if (gapsError()) {
+          <div class="alert alert-danger py-2 mt-2 mb-0">{{ gapsError() }}</div>
+        } @else {
+          <div class="table-responsive mt-2">
+            <table class="table sf-table mb-0">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Competency</th>
+                  <th>Gap</th>
+                  <th>Identified</th>
+                  @if (isManager) { <th></th> }
+                </tr>
+              </thead>
+              <tbody>
+                @for (g of filteredGaps; track g.skillGapID) {
+                  <tr class="sf-table-row">
+                    <td class="fw-semibold">{{ g.employeeName }}</td>
+                    <td class="sf-muted">{{ g.competencyName }}</td>
+                    <td><app-status-badge [status]="g.gapLevel"></app-status-badge></td>
+                    <td class="sf-muted">{{ g.dateIdentified | date:'MMM d, y' }}</td>
+                    @if (isManager) {
+                      <td>
+                        <div class="d-flex gap-1">
+                          <button class="sf-btn-sm sf-btn-sm-primary" type="button"
+                            (click)="openAssignTraining(g)" title="Assign training">
+                            <i class="bi bi-person-plus"></i>
+                          </button>
+                          @if (isHR) {
+                            <button class="sf-btn-sm sf-btn-sm-danger" type="button"
+                              (click)="openDeleteGap(g)" title="Delete skill gap">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          }
+                        </div>
+                      </td>
+                    }
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td [attr.colspan]="isManager ? 5 : 4" class="text-center py-4 sf-muted">
+                      No skill gaps found.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Summary chips -->
+          <div class="mt-4">
+            <div class="sf-card-title small mb-2">Summary</div>
+            <div class="d-flex gap-2 flex-wrap">
+              <div class="sf-stat-chip">
+                <span class="fw-bold text-danger">{{ highGapCount }}</span> High
+              </div>
+              <div class="sf-stat-chip">
+                <span class="fw-bold text-warning">{{ mediumGapCount }}</span> Medium
+              </div>
+              <div class="sf-stat-chip">
+                <span class="fw-bold text-success">{{ lowGapCount }}</span> Low
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Competency Catalog (HR/Admin only) ─────────────────────────────── -->
+  @if (isManager) {
+    <div class="sf-card mt-3">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="sf-card-title mb-0"><i class="bi bi-collection me-2"></i>Competency Catalog</div>
+        <div class="sf-input-group" style="max-width:220px;">
+          <span class="sf-input-icon"><i class="bi bi-search"></i></span>
+          <input class="sf-input" placeholder="Search competencies…"
+            [ngModel]="competencySearch()" (ngModelChange)="competencySearch.set($event)" />
+        </div>
+      </div>
+
+      @if (competenciesLoading()) {
+        <app-spinner></app-spinner>
+      } @else {
+        <div class="table-responsive">
+          <table class="table sf-table mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Level</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of filteredCompetencies; track c.competencyId) {
+                @if (editingCompetency()?.competencyId === c.competencyId) {
+                  <!-- Inline edit row -->
+                  <tr class="sf-table-row" [formGroup]="editCompetencyForm">
+                    <td>
+                      <input class="sf-input sf-input-sm w-100" formControlName="name" placeholder="Name"
+                        [class.is-invalid]="editCompetencyForm.get('name')!.invalid && editCompetencyForm.get('name')!.touched" />
+                    </td>
+                    <td>
+                      <input class="sf-input sf-input-sm w-100" formControlName="description" placeholder="Description" />
+                    </td>
+                    <td>
+                      <select class="sf-select sf-select-sm" formControlName="level">
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                      </select>
+                    </td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <button class="sf-btn-sm sf-btn-sm-primary" type="button"
+                          [disabled]="editCompetencyLoading()" (click)="submitEditCompetency()">
+                          @if (editCompetencyLoading()) { <span class="spinner-border spinner-border-sm"></span> }
+                          @else { <i class="bi bi-check-lg"></i> }
+                        </button>
+                        <button class="sf-btn-sm sf-btn-sm-ghost" type="button" (click)="closeEditCompetency()">
+                          <i class="bi bi-x-lg"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                } @else {
+                  <tr class="sf-table-row">
+                    <td class="fw-semibold">{{ c.name }}</td>
+                    <td class="sf-muted">{{ c.description || '—' }}</td>
+                    <td><span class="sf-chip">{{ c.level }}</span></td>
+                    <td>
+                      @if (isHR) {
+                      <div class="d-flex gap-1">
+                        <button class="sf-btn-sm sf-btn-sm-ghost" type="button"
+                                (click)="openEditCompetency(c)" title="Edit">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="sf-btn-sm sf-btn-sm-danger" type="button"
+                                (click)="openDeleteCompetency(c)" title="Delete">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                      }
+                    </td>
+                  </tr>
+                }
+              } @empty {
+                <tr><td colspan="4" class="text-center py-4 sf-muted">No competencies found.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+
+<!-- ── Assign Training Modal ────────────────────────────────────────────── -->
+@if (showAssignModal() && assignTarget()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeAssignModal()">
+  <div class="sf-modal" style="max-width:500px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-person-plus me-2"></i>Assign Training</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeAssignModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+      @if (!assignResult()) {
+        <div class="sf-card mb-3" style="background:var(--sf-bg);">
+          <div class="row g-2">
+            <div class="col-6">
+              <span class="sf-muted small">Employee</span>
+              <div class="fw-semibold">{{ assignTarget()!.employeeName }}</div>
+            </div>
+            <div class="col-6">
+              <span class="sf-muted small">Competency Gap</span>
+              <div class="fw-semibold">{{ assignTarget()!.competencyName }}</div>
+            </div>
+            <div class="col-6">
+              <span class="sf-muted small">Gap Level</span>
+              <div><app-status-badge [status]="assignTarget()!.gapLevel"></app-status-badge></div>
+            </div>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="sf-label">Select Course to Assign <span class="text-danger">*</span></label>
+          @if (assignCoursesLoading()) {
+            <div class="sf-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Loading courses…</div>
+          } @else {
+            <select class="sf-select w-100"
+              [ngModel]="assignCourseId()" (ngModelChange)="assignCourseId.set(+$event || null)">
+              <option [ngValue]="null" disabled>Select a live course…</option>
+              @for (c of assignCourses(); track c.courseID) {
+                <option [ngValue]="c.courseID">{{ c.title }}</option>
+              }
+            </select>
+          }
+        </div>
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="sf-btn-ghost" (click)="closeAssignModal()">Cancel</button>
+          <button type="button" class="sf-btn-primary"
+            [disabled]="assignSubmitting() || !assignCourseId()"
+            (click)="submitAssignTraining()">
+            @if (assignSubmitting()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            <i class="bi bi-person-plus me-1"></i>Assign Training
+          </button>
+        </div>
+      } @else {
+        <div class="text-center mb-4">
+          @if (assignResult()!.succeeded > 0) {
+            <i class="bi bi-check-circle-fill text-success" style="font-size:2.5rem;"></i>
+            <div class="fw-semibold mt-2">Training assigned to {{ assignTarget()!.employeeName }}!</div>
+          } @else {
+            <i class="bi bi-x-circle-fill text-danger" style="font-size:2.5rem;"></i>
+            <div class="fw-semibold mt-2">Assignment failed.</div>
+            @if (assignResult()!.results[0]?.reason) {
+              <div class="sf-muted small mt-1">{{ assignResult()!.results[0].reason }}</div>
+            }
+          }
+        </div>
+        <div class="d-flex justify-content-end">
+          <button type="button" class="sf-btn-primary" (click)="closeAssignModal()">Close</button>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── Create Competency Modal ───────────────────────────────────────────── -->
+@if (showCreateCompetencyModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeCreateCompetency()">
+  <div class="sf-modal" style="max-width:480px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>New Competency</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeCreateCompetency()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body" [formGroup]="createCompetencyForm">
+      <div class="mb-3">
+        <label class="sf-label">Name <span class="text-danger">*</span></label>
+        <input class="sf-input w-100" formControlName="name" placeholder="e.g. Java"
+          [class.is-invalid]="createCompetencyForm.get('name')!.invalid && createCompetencyForm.get('name')!.touched" />
+        @if (createCompetencyForm.get('name')!.errors?.['required'] && createCompetencyForm.get('name')!.touched) {
+          <div class="invalid-feedback d-block">Name is required.</div>
+        }
+        @if (createCompetencyForm.get('name')!.errors?.['maxlength']) {
+          <div class="invalid-feedback d-block">Max 10 characters.</div>
+        }
+      </div>
+      <div class="mb-3">
+        <label class="sf-label">Description</label>
+        <input class="sf-input w-100" formControlName="description" placeholder="Brief description (optional)" />
+      </div>
+      <div class="mb-4">
+        <label class="sf-label">Level <span class="text-danger">*</span></label>
+        <select class="sf-select w-100" formControlName="level">
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+          <option value="Advanced">Advanced</option>
+        </select>
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeCreateCompetency()">Cancel</button>
+        <button type="button" class="sf-btn-primary" [disabled]="createCompetencyLoading()"
+          (click)="submitCreateCompetency()">
+          @if (createCompetencyLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          <i class="bi bi-plus-lg me-1"></i>Create
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── Delete Competency Modal ───────────────────────────────────────────── -->
+@if (showDeleteCompetencyModal() && competencyToDelete()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeDeleteCompetency()">
+  <div class="sf-modal" style="max-width:420px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Delete Competency</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeDeleteCompetency()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+      <p class="mb-4">
+        Delete <strong>{{ competencyToDelete()!.name }}</strong>? This will also remove all associated skill gap records.
+      </p>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeDeleteCompetency()">Cancel</button>
+        <button type="button" class="sf-btn-danger" [disabled]="deleteCompetencyLoading()"
+          (click)="confirmDeleteCompetency()">
+          @if (deleteCompetencyLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── Create Skill Gap Modal ────────────────────────────────────────────── -->
+@if (showCreateGapModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeCreateGap()">
+  <div class="sf-modal" style="max-width:480px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-graph-up me-2"></i>Add Skill Gap</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeCreateGap()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body" [formGroup]="createGapForm">
+      <div class="mb-3">
+        <label class="sf-label">Employee <span class="text-danger">*</span></label>
+        @if (employeesLoading()) {
+          <div class="sf-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Loading employees…</div>
+        } @else {
+          <select class="sf-select w-100" formControlName="employeeId"
+            [class.is-invalid]="createGapForm.get('employeeId')!.invalid && createGapForm.get('employeeId')!.touched">
+            <option [ngValue]="null" disabled>Select employee…</option>
+            @for (e of employees(); track e.userID) {
+              <option [ngValue]="e.userID">{{ e.userName }}</option>
+            }
+          </select>
+        }
+        @if (createGapForm.get('employeeId')!.invalid && createGapForm.get('employeeId')!.touched) {
+          <div class="invalid-feedback d-block">Employee is required.</div>
+        }
+      </div>
+      <div class="mb-3">
+        <label class="sf-label">Competency <span class="text-danger">*</span></label>
+        @if (competenciesLoading()) {
+          <div class="sf-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Loading…</div>
+        } @else {
+          <select class="sf-select w-100" formControlName="competencyId"
+            [class.is-invalid]="createGapForm.get('competencyId')!.invalid && createGapForm.get('competencyId')!.touched">
+            <option [ngValue]="null" disabled>Select competency…</option>
+            @for (c of competencies(); track c.competencyId) {
+              <option [ngValue]="c.competencyId">{{ c.name }} ({{ c.level }})</option>
+            }
+          </select>
+        }
+        @if (createGapForm.get('competencyId')!.invalid && createGapForm.get('competencyId')!.touched) {
+          <div class="invalid-feedback d-block">Competency is required.</div>
+        }
+      </div>
+      <div class="mb-3">
+        <label class="sf-label">Gap Level <span class="text-danger">*</span></label>
+        <select class="sf-select w-100" formControlName="gapLevel">
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="sf-label">Date Identified <span class="text-danger">*</span></label>
+        <input class="sf-input w-100" type="date" formControlName="dateIdentified" [max]="todayIso()"
+          [class.is-invalid]="createGapForm.get('dateIdentified')!.invalid && createGapForm.get('dateIdentified')!.touched" />
+        @if (createGapForm.get('dateIdentified')!.invalid && createGapForm.get('dateIdentified')!.touched) {
+          <div class="invalid-feedback d-block">Date is required.</div>
+        }
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeCreateGap()">Cancel</button>
+        <button type="button" class="sf-btn-primary" [disabled]="createGapLoading()"
+          (click)="submitCreateGap()">
+          @if (createGapLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          <i class="bi bi-plus-lg me-1"></i>Add Gap
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── Delete Skill Gap Modal ────────────────────────────────────────────── -->
+@if (showDeleteGapModal() && gapToDelete()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeDeleteGap()">
+  <div class="sf-modal" style="max-width:420px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Delete Skill Gap</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeDeleteGap()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+      <p class="mb-4">
+        Remove the <strong>{{ gapToDelete()!.gapLevel }}</strong> gap for
+        <strong>{{ gapToDelete()!.employeeName }}</strong> in
+        <strong>{{ gapToDelete()!.competencyName }}</strong>?
+      </p>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeDeleteGap()">Cancel</button>
+        <button type="button" class="sf-btn-danger" [disabled]="deleteGapLoading()"
+          (click)="confirmDeleteGap()">
+          @if (deleteGapLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}

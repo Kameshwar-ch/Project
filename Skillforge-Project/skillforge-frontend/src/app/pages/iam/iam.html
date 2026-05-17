@@ -1,0 +1,226 @@
+<div class="sf-page fade-in">
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb sf-breadcrumb mb-1">
+        <li class="breadcrumb-item sf-muted">Home</li>
+        <li class="breadcrumb-item active">Identity & Access</li>
+      </ol></nav>
+      <h2 class="sf-page-title">Identity & Access Management</h2>
+    </div>
+    <button class="sf-btn-primary" type="button" (click)="openCreate()">
+      <i class="bi bi-person-plus me-1"></i>Create User
+    </button>
+  </div>
+
+  @if (toast()) {
+    <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+      <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+      {{ toast() }}
+    </div>
+  }
+
+  <div class="row g-3">
+    <!-- Users -->
+    <div class="col-md-7">
+      <div class="sf-card h-100">
+        <div class="sf-card-title"><i class="bi bi-people me-2"></i>Users</div>
+        <div class="sf-input-group my-3" style="max-width:280px;">
+          <span class="sf-input-icon"><i class="bi bi-search"></i></span>
+          <input class="sf-input" placeholder="Search user or email…"
+                 [ngModel]="search()" (ngModelChange)="search.set($event)" />
+        </div>
+        @if (loading()) {
+          <app-spinner></app-spinner>
+        } @else {
+          <div style="max-height:420px;overflow-y:auto;">
+            <table class="table sf-table mb-0" style="table-layout:fixed;width:100%;">
+              <colgroup>
+                <col style="width:20%">
+                <col style="width:31%">
+                <col style="width:16%">
+                <col style="width:16%">
+                <col style="width:17%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Name</th>
+                  <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Email</th>
+                  <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Role</th>
+                  <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Status</th>
+                  <th style="position:sticky;top:0;z-index:1;background:var(--sf-panel);">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (u of filtered; track u.userID) {
+                  <tr class="sf-table-row">
+                    <td class="fw-semibold">{{ u.userName }}</td>
+                    <td class="sf-muted" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ u.email }}</td>
+                    <td><span class="sf-chip">{{ u.roleName }}</span></td>
+                    <td><app-status-badge [status]="u.status ? 'Active' : 'Inactive'"></app-status-badge></td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <button class="sf-btn-sm" type="button" (click)="openEdit(u)">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="sf-btn-sm" type="button" style="color:var(--sf-danger);"
+                                (click)="openDelete(u)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="text-center py-4 sf-muted">No users found.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Create User Modal -->
+    @if (showCreateModal()) {
+    <div class="sf-modal-backdrop fade-in" (click)="closeCreate()">
+      <div class="sf-modal" (click)="$event.stopPropagation()">
+        <div class="sf-modal-header">
+          <h5 class="fw-bold mb-0"><i class="bi bi-person-plus me-2"></i>Create User</h5>
+          <button class="sf-btn-ghost" type="button" (click)="closeCreate()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="sf-modal-body">
+          <form [formGroup]="createForm" (ngSubmit)="submitCreate()" novalidate>
+            <div class="mb-3">
+              <label class="sf-label">Full Name <span class="text-danger">*</span></label>
+              <input class="sf-input w-100" formControlName="name" placeholder="e.g. Jane Smith"
+                [class.is-invalid]="createForm.get('name')?.invalid && createForm.get('name')?.touched" />
+              @if (createForm.get('name')?.invalid && createForm.get('name')?.touched) {
+                <div class="sf-field-error">Name is required.</div>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="sf-label">Email <span class="text-danger">*</span></label>
+              <input class="sf-input w-100" formControlName="email" type="email" placeholder="e.g. jane@company.com"
+                [class.is-invalid]="createForm.get('email')?.invalid && createForm.get('email')?.touched" />
+              @if (createForm.get('email')?.invalid && createForm.get('email')?.touched) {
+                <div class="sf-field-error">A valid email is required.</div>
+              }
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col">
+                <label class="sf-label">Role <span class="text-danger">*</span></label>
+                <select class="sf-select w-100" formControlName="role">
+                  @for (r of creatableRoles; track r) {
+                    <option [value]="r">{{ r }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col">
+                <label class="sf-label">Phone <span class="text-danger">*</span></label>
+                <input class="sf-input w-100" formControlName="phone" placeholder="10-digit number"
+                  [class.is-invalid]="createForm.get('phone')?.invalid && createForm.get('phone')?.touched" />
+                @if (createForm.get('phone')?.invalid && createForm.get('phone')?.touched) {
+                  <div class="sf-field-error">Valid 10-digit phone required.</div>
+                }
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="sf-label">Password <span class="text-danger">*</span></label>
+              <input class="sf-input w-100" formControlName="password" type="password" placeholder="Min 6 characters"
+                [class.is-invalid]="createForm.get('password')?.invalid && createForm.get('password')?.touched" />
+              @if (createForm.get('password')?.invalid && createForm.get('password')?.touched) {
+                <div class="sf-field-error">Password must be at least 6 characters.</div>
+              }
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+              <button type="button" class="sf-btn-ghost" (click)="closeCreate()">Cancel</button>
+              <button type="submit" class="sf-btn-primary" [disabled]="createLoading()">
+                @if (createLoading()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                Create User
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Edit User Status Modal -->
+    @if (showEditModal() && selectedUser()) {
+    <div class="sf-modal-backdrop fade-in" (click)="closeEdit()">
+      <div class="sf-modal" (click)="$event.stopPropagation()">
+        <div class="sf-modal-header">
+          <h5 class="fw-bold mb-0"><i class="bi bi-pencil me-2"></i>Edit User Status</h5>
+          <button class="sf-btn-ghost" type="button" (click)="closeEdit()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="sf-modal-body">
+          <p class="sf-muted mb-3">Updating status for: <strong>{{ selectedUser()!.userName }}</strong></p>
+          <div class="mb-3">
+            <label class="sf-label">Status</label>
+            <select class="sf-select w-100" [ngModel]="editStatus()" (ngModelChange)="editStatus.set($event)">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+          <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="sf-btn-ghost" (click)="closeEdit()">Cancel</button>
+            <button type="button" class="sf-btn-primary" [disabled]="updateLoading()" (click)="submitUpdate()">
+              @if (updateLoading()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              Update
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Delete User Modal -->
+    @if (showDeleteModal() && userToDelete()) {
+    <div class="sf-modal-backdrop fade-in" (click)="closeDelete()">
+      <div class="sf-modal" style="max-width:420px;" (click)="$event.stopPropagation()">
+        <div class="sf-modal-header">
+          <h5 class="fw-bold mb-0"><i class="bi bi-person-x me-2" style="color:var(--sf-danger);"></i>Delete User</h5>
+          <button class="sf-btn-ghost" type="button" (click)="closeDelete()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="sf-modal-body">
+          <p class="mb-1">Are you sure you want to delete:</p>
+          <p class="fw-semibold fs-6 mb-1">"{{ userToDelete()!.userName }}"</p>
+          <p class="sf-muted small mb-4">{{ userToDelete()!.email }} &middot; {{ userToDelete()!.roleName }}</p>
+          <p class="sf-muted small mb-4">This action is permanent and cannot be undone.</p>
+          <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="sf-btn-ghost" (click)="closeDelete()">Cancel</button>
+            <button type="button" class="sf-btn-primary"
+                    style="background:var(--sf-danger);border-color:var(--sf-danger);"
+                    [disabled]="deleteLoading()" (click)="confirmDelete()">
+              @if (deleteLoading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              <i class="bi bi-trash me-1"></i>Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Roles & Permissions -->
+    <div class="col-md-5">
+      <div class="sf-card h-100">
+        <div class="sf-card-title"><i class="bi bi-shield-lock me-2"></i>Roles & Permissions</div>
+        <div class="mt-3 d-flex flex-column gap-2">
+          @for (rp of rolePermissions; track rp.role) {
+            <div class="sf-perm-row">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="sf-chip">{{ rp.role }}</span>
+              </div>
+              <p class="sf-muted small mb-0">{{ rp.cap }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

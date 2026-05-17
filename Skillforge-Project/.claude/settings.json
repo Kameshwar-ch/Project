@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(find /c/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge -type f -name \"*.cs\" -exec grep -l \"^public class ReportSchedule\\\\|^public class Report \" {} \\\\;)",
+      "Bash(find /c/Users/2479414/Desktop/Skillforge -type f -name \"*.cs\" -exec grep -l \"namespace.*Domain\\\\|class.*ReportSchedule\\\\|class.*Report[^a-zA-Z]\" {} \\\\;)",
+      "Bash(find \"c:/Users/2479414/Desktop/Skillforge/skillforge-frontend/src/environments\" -name \"*.ts\" -exec cat {} \\\\;)",
+      "Bash(grep -l \"HttpGet\\\\|HttpPost\\\\|HttpPut\\\\|HttpDelete\\\\|HttpPatch\" /c/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge/Controllers/*.cs)",
+      "Bash(xargs cat:*)",
+      "Read(//c/Users/2479414/Desktop/Skillforge/**)",
+      "Bash(grep -l \"AttendanceRequest\" /c/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge.Databases/Skillforge.Data/Migrations/*.cs)",
+      "Bash(xargs ls:*)",
+      "Bash(find \"c:/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge/Dto/\" -name \"*Module*\" -exec cat {} \\\\;)",
+      "Bash(dotnet ef:*)",
+      "Bash(find \"c:/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge/Dto/\" -name \"*Assessment*\" -exec cat {} \\\\;)",
+      "Bash(find \"c:/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge/Controllers/\" -name \"Result*\" -exec cat {} \\\\;)"
+    ]
+  }
+}

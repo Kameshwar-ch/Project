@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"CORS\\\\|Cors\\\\|cors\\\\|AllowAnyOrigin\\\\|WithOrigins\" /c/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge/*.cs)",
+      "Bash(grep -r \"HttpPatch\\\\|patch\" /c/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge/Controllers/*.cs)",
+      "Bash(grep -r \"HttpGet\\\\|HttpPost\\\\|HttpPut\\\\|HttpPatch\\\\|HttpDelete\" /c/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge/Controllers/*.cs)",
+      "Bash(grep -E \"\\\\.\\(cs\\)$\")",
+      "Bash(grep -l \"IReportRepository\\\\|IUserRepository\" /c/Users/2479414/Desktop/Skillforge/Skillforge/Skillforge/Repository/*.cs)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run:*)",
+      "Bash(curl -s -X POST http://localhost:5000/api/v1/Course -H 'Content-Type: application/json' -d '{\"title\":\"Test\",\"description\":\"Test desc\",\"duration\":5,\"trainerID\":1}' -w '\\\\nHTTP_STATUS:%{http_code}')",
+      "Bash(curl -s -X POST http://localhost:5000/api/v1/Auth/login -H 'Content-Type: application/json' -d '{\"email\":\"trainer@example.com\",\"password\":\"Test1234!\"}')"
+    ]
+  }
+}

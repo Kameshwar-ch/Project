@@ -1,0 +1,520 @@
+<div class="sf-page fade-in">
+  <div class="sf-page-header">
+    <div>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb sf-breadcrumb mb-1">
+        <li class="breadcrumb-item sf-muted">Home</li>
+        <li class="breadcrumb-item active">Assessments & Certifications</li>
+      </ol></nav>
+      <h2 class="sf-page-title">Assessments & Certifications</h2>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="sf-toast fade-in" [class.sf-toast-error]="toastType() === 'error'">
+      <i class="bi" [ngClass]="toastType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
+      {{ toast() }}
+    </div>
+  }
+
+  <div class="row g-3">
+    <!-- Assessments -->
+    <div class="col-12">
+      @if (isEmployee) {
+      <!-- ── Employee: My Assessments ── -->
+      <div class="sf-card h-100">
+        <div class="sf-card-title d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-clipboard-check me-2"></i>My Assessments</span>
+          <div class="d-flex gap-2 align-items-center">
+            <select class="sf-select" style="width:auto;"
+                    [ngModel]="courseFilterValue()" (ngModelChange)="courseFilterValue.set($event)">
+              <option value="All">All Courses</option>
+              @for (name of courseNames(); track name) {
+              <option [value]="name">{{ name }}</option>
+              }
+            </select>
+            <button class="sf-btn-sm" [class.sf-btn-sm-primary]="!showPendingOnly()"
+                    type="button" (click)="showPendingOnly.set(false)">
+              All
+            </button>
+            <button class="sf-btn-sm" [class.sf-btn-sm-primary]="showPendingOnly()"
+                    type="button" (click)="showPendingOnly.set(true)">
+              Pending
+            </button>
+          </div>
+        </div>
+
+        @if (loadingMyAssessments()) {
+        <app-spinner></app-spinner>
+        } @else {
+        <div class="table-responsive mt-2">
+          <table class="table sf-table mb-0">
+            <thead><tr><th>Course</th><th>Type</th><th>Max</th><th>Score</th><th>Result</th><th></th></tr></thead>
+            <tbody>
+              @for (a of filteredMyAssessments(); track a.assessmentId) {
+              <tr class="sf-table-row">
+                <td class="fw-semibold">{{ a.courseName }}</td>
+                <td><span class="sf-chip">{{ a.type }}</span></td>
+                <td>{{ a.maxScore }}</td>
+                <td>
+                  @if (a.resultStatus) {
+                  <span class="fw-semibold">{{ a.score }}/{{ a.maxScore }}</span>
+                  } @else {
+                  <span class="sf-muted">—</span>
+                  }
+                </td>
+                <td>
+                  @if (!a.resultStatus) {
+                  <span class="sf-chip">Not submitted</span>
+                  } @else if (a.resultStatus === 'Pending') {
+                  <span class="sf-chip" style="background:#fef9c3;color:#92400e;">
+                    <i class="bi bi-hourglass-split me-1"></i>Pending Review
+                  </span>
+                  } @else if (a.resultStatus === 'Pass') {
+                  <span class="sf-chip" style="background:#d1fae5;color:#065f46;">
+                    <i class="bi bi-check-circle-fill me-1"></i>Passed
+                  </span>
+                  } @else if (a.resultStatus === 'Fail') {
+                  <span class="sf-chip" style="background:#fee2e2;color:#991b1b;">
+                    <i class="bi bi-x-circle-fill me-1"></i>Failed
+                  </span>
+                  }
+                </td>
+                <td>
+                  @if (!a.isDone) {
+                  <button class="sf-btn-sm sf-btn-sm-primary" type="button" (click)="openTake(a)">
+                    <i class="bi bi-play-circle me-1"></i>{{ a.resultStatus === 'Fail' || a.resultStatus === 'Pass' ? 'Retake' : 'Start' }}
+                  </button>
+                  }
+                </td>
+              </tr>
+              } @empty {
+              <tr>
+                <td colspan="6" class="text-center py-4 sf-muted">
+                  @if (showPendingOnly()) { All caught up — no pending assessments. }
+                  @else { No assessments for your enrolled courses. }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </div>
+      } @else {
+      <!-- ── Trainer / Admin: All Assessments ── -->
+      <div class="sf-card h-100">
+        <div class="sf-card-title d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-clipboard-check me-2"></i>Assessments</span>
+          <div class="d-flex gap-2 align-items-center">
+            <select class="sf-select" style="width:auto;"
+                    [ngModel]="assessmentCourseFilter()" (ngModelChange)="assessmentCourseFilter.set($event)">
+              <option value="All">All Courses</option>
+              @for (name of assessmentCourseNames; track name) {
+              <option [value]="name">{{ name }}</option>
+              }
+            </select>
+            @if (canCreate) {
+            <button class="sf-btn-sm sf-btn-sm-primary" type="button" (click)="openCreate()">
+              <i class="bi bi-plus me-1"></i>New
+            </button>
+            }
+          </div>
+        </div>
+
+        @if (loadingAssessments()) {
+        <app-spinner></app-spinner>
+        } @else if (assessmentError()) {
+        <div class="alert alert-danger py-2 mt-2 mb-0">{{ assessmentError() }}</div>
+        } @else {
+        <div class="table-responsive mt-2">
+          <table class="table sf-table mb-0">
+            <thead><tr><th>Course</th><th>Type</th><th>Max</th><th>Pass</th><th>Date</th><th></th></tr></thead>
+            <tbody>
+              @for (a of filteredAssessments; track a.assessmentId) {
+              <tr class="sf-table-row">
+                <td class="fw-semibold">{{ a.courseName }}</td>
+                <td><span class="sf-chip">{{ a.type }}</span></td>
+                <td>{{ a.maxScore }}</td>
+                <td class="sf-muted">{{ a.passingScore }}</td>
+                <td class="sf-muted">{{ a.date | date:'MMM d, y' }}</td>
+              </tr>
+              } @empty {
+              <tr><td colspan="6" class="text-center py-4 sf-muted">No assessments found.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </div>
+      }
+    </div>
+
+    <!-- Trainer: Pending Submissions -->
+    @if (isTrainer) {
+      <div class="col-12">
+        <div class="sf-card">
+          <div class="sf-card-title d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-hourglass-split text-warning me-2"></i>Pending Submissions</span>
+            <span class="sf-muted small">{{ pendingResults().length }} awaiting evaluation</span>
+          </div>
+
+          @if (pendingResultsLoading()) {
+            <app-spinner></app-spinner>
+          } @else if (pendingResults().length === 0) {
+            <p class="sf-muted mt-3 mb-0">No pending submissions to review.</p>
+          } @else {
+            <div class="table-responsive mt-2">
+              <table class="table sf-table mb-0">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Course</th>
+                    <th>Type</th>
+                    <th>Score</th>
+                    <th>Max</th>
+                    <th>Pass Mark</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of pendingResults(); track r.assessmentId + '-' + r.employeeId) {
+                    <tr class="sf-table-row">
+                      <td class="fw-semibold">{{ r.employeeName }}</td>
+                      <td>{{ r.courseName }}</td>
+                      <td><span class="sf-chip">{{ r.assessmentType }}</span></td>
+                      <td class="fw-semibold" [style.color]="r.score >= r.passingScore ? 'var(--sf-success,#059669)' : 'var(--sf-danger,#dc2626)'">
+                        {{ r.score }}
+                      </td>
+                      <td class="sf-muted">{{ r.maxScore }}</td>
+                      <td class="sf-muted">{{ r.passingScore }}</td>
+                      <td>
+                        <button class="sf-btn-sm sf-btn-sm-primary" type="button"
+                          (click)="openEval(r)">
+                          <i class="bi bi-check2-circle me-1"></i>Evaluate
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Certifications -->
+    <div class="col-12">
+      <div class="sf-card h-100">
+        <!-- Header row — no Issue button; certificates are auto-issued on course completion. -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="sf-card-title mb-0"><i class="bi bi-patch-check me-2"></i>Certifications</div>
+          <button class="sf-btn-sm" type="button" (click)="exportCerts()" title="Export as CSV">
+            <i class="bi bi-download me-1"></i>Export
+          </button>
+        </div>
+
+        <!-- Status filter -->
+        <div class="d-flex gap-2 align-items-center mb-2 flex-wrap">
+          <select class="sf-select" style="width:auto;"
+                  [ngModel]="certCourseFilter()" (ngModelChange)="certCourseFilter.set($event)">
+            <option value="All">All Courses</option>
+            @for (name of certCourseNames; track name) {
+            <option [value]="name">{{ name }}</option>
+            }
+          </select>
+          @if (!isEmployee) {
+          <select class="sf-select" style="width:auto;"
+                  [ngModel]="certNameFilter()" (ngModelChange)="certNameFilter.set($event)">
+            <option value="All">All Employees</option>
+            @for (name of certEmployeeNames; track name) {
+            <option [value]="name">{{ name }}</option>
+            }
+          </select>
+          }
+          <select class="sf-select" style="width:auto;"
+                  [ngModel]="certStatusFilter()" (ngModelChange)="certStatusFilter.set($event)">
+            <option>All</option>
+            <option>Active</option>
+            <option>Expiring</option>
+            <option>Expired</option>
+          </select>
+          <span class="sf-muted small ms-1">
+            {{ filteredCerts.length }} record{{ filteredCerts.length !== 1 ? 's' : '' }}
+          </span>
+        </div>
+
+        @if (loadingCerts()) {
+          <app-spinner></app-spinner>
+        } @else if (certError()) {
+          <div class="alert alert-danger py-2 mt-2 mb-0">{{ certError() }}</div>
+        } @else {
+          <div class="table-responsive mt-2">
+            <table class="table sf-table mb-0">
+              <thead>
+                <tr>
+                  @if (!isEmployee) { <th>Employee</th> }
+                  <th>Course</th>
+                  <th>Issued</th>
+                  <th>Expiry</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of filteredCerts; track c.certificationId) {
+                  <tr class="sf-table-row">
+                    @if (!isEmployee) { <td class="fw-semibold">{{ c.employeeName }}</td> }
+                    <td>{{ c.courseName }}</td>
+                    <td class="sf-muted">{{ c.issueDate | date:'MMM d, y' }}</td>
+                    <td class="sf-muted" [class.text-danger]="isExpiringSoon(c)">
+                      {{ c.expiryDate | date:'MMM d, y' }}
+                      @if (isExpiringSoon(c)) { <i class="bi bi-exclamation-triangle-fill ms-1" title="Expiring within 30 days"></i> }
+                    </td>
+                    <td><app-status-badge [status]="c.status"></app-status-badge></td>
+                    <td>
+                      @if (isEmployee) {
+                        <button class="sf-btn-sm sf-btn-sm-primary" type="button"
+                          (click)="downloadCert(c)" title="Download certificate">
+                          <i class="bi bi-download me-1"></i>Download
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td [attr.colspan]="isEmployee ? 5 : 6" class="text-center py-4 sf-muted">No certifications found.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Take Assessment Modal (Employee) ──────────────────────────────── -->
+@if (showTakeModal() && selectedMyAssessment()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeTake()">
+  <div class="sf-modal" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-play-circle me-2"></i>Start Assessment</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeTake()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      <!-- Assessment details -->
+      <div class="sf-card mb-3" style="background:var(--sf-bg);">
+        <div class="d-flex gap-3 flex-wrap">
+          <div><span class="sf-muted small">Course</span><div class="fw-semibold">{{ selectedMyAssessment()!.courseName }}</div></div>
+          <div><span class="sf-muted small">Type</span><div><span class="sf-chip">{{ selectedMyAssessment()!.type }}</span></div></div>
+          <div><span class="sf-muted small">Max Score</span><div class="fw-semibold">{{ selectedMyAssessment()!.maxScore }}</div></div>
+        </div>
+      </div>
+
+      <form [formGroup]="takeForm" (ngSubmit)="submitTake()" novalidate>
+        <div class="mb-4">
+          <label class="sf-label">Your Score (0 – {{ selectedMyAssessment()!.maxScore }}) <span class="text-danger">*</span></label>
+          <input type="number" class="sf-input w-100" formControlName="score"
+            [min]="0" [max]="selectedMyAssessment()!.maxScore" placeholder="Enter your score"
+            [class.is-invalid]="takeForm.get('score')?.invalid && takeForm.get('score')?.touched" />
+          @if (takeForm.get('score')?.invalid && takeForm.get('score')?.touched) {
+            <div class="sf-field-error">Score must be between 0 and {{ selectedMyAssessment()!.maxScore }}.</div>
+          }
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="sf-btn-ghost" (click)="closeTake()">Cancel</button>
+          <button type="submit" class="sf-btn-primary" [disabled]="takeLoading()">
+            @if (takeLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            <i class="bi bi-send me-1"></i>Submit Assessment
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- ── Create Assessment Modal ─────────────────────────────────────────── -->
+@if (showCreateModal()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeCreate()">
+  <div class="sf-modal" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-clipboard-plus me-2"></i>New Assessment</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeCreate()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" novalidate>
+
+        <!-- Course -->
+        <div class="mb-3">
+          <label class="sf-label">Course <span class="text-danger">*</span></label>
+          @if (coursesLoading()) {
+            <div class="sf-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Loading courses…</div>
+          } @else {
+            <select class="sf-select w-100" formControlName="courseId"
+              [class.is-invalid]="createForm.get('courseId')?.invalid && createForm.get('courseId')?.touched"
+              (change)="onCreateCourseChange(createForm.get('courseId')?.value)">
+              <option [ngValue]="null" disabled>Select a draft course…</option>
+              @for (c of courses; track c.courseID) {
+                <option [ngValue]="c.courseID">{{ c.title }}</option>
+              }
+            </select>
+            @if (createForm.get('courseId')?.invalid && createForm.get('courseId')?.touched) {
+              <div class="sf-field-error">Course is required.</div>
+            }
+          }
+        </div>
+
+        <!-- Module (optional — links assessment to a specific module) -->
+        <div class="mb-3">
+          <label class="sf-label">Module <span class="sf-muted small fw-normal">(optional — leave blank for course-level)</span></label>
+          @if (modulesLoading()) {
+            <div class="sf-muted small"><span class="spinner-border spinner-border-sm me-1"></span>Loading modules…</div>
+          } @else {
+            <select class="sf-select w-100" formControlName="moduleId"
+              [disabled]="!createForm.get('courseId')?.value || createModules().length === 0">
+              <option [ngValue]="null">No specific module (course-level)</option>
+              @for (m of createModules(); track m.moduleID) {
+                <option [ngValue]="m.moduleID">{{ m.title }}</option>
+              }
+            </select>
+            @if (createForm.get('courseId')?.value && createModules().length === 0 && !modulesLoading()) {
+              <div class="sf-muted small mt-1">No modules found for this course.</div>
+            }
+          }
+        </div>
+
+        <!-- Type -->
+        <div class="mb-3">
+          <label class="sf-label">Type <span class="text-danger">*</span></label>
+          <select class="sf-select w-100" formControlName="type"
+            [class.is-invalid]="createForm.get('type')?.invalid && createForm.get('type')?.touched">
+            <option [ngValue]="null" disabled>Select type…</option>
+            @for (t of assessmentTypes; track t.value) {
+              <option [ngValue]="t.value">{{ t.label }}</option>
+            }
+          </select>
+          @if (createForm.get('type')?.invalid && createForm.get('type')?.touched) {
+            <div class="sf-field-error">Type is required.</div>
+          }
+        </div>
+
+        <!-- Max Score + Passing Score row -->
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <label class="sf-label">Max Score (1 – 100) <span class="text-danger">*</span></label>
+            <input type="number" class="sf-input w-100" formControlName="maxScore"
+              min="1" max="100" placeholder="e.g. 100"
+              [class.is-invalid]="createForm.get('maxScore')?.invalid && createForm.get('maxScore')?.touched" />
+            @if (createForm.get('maxScore')?.invalid && createForm.get('maxScore')?.touched) {
+              <div class="sf-field-error">Max Score must be between 1 and 100.</div>
+            }
+          </div>
+          <div class="col-6">
+            <label class="sf-label">Passing Score <span class="text-danger">*</span></label>
+            <input type="number" class="sf-input w-100" formControlName="passingScore"
+              min="1" [max]="createForm.get('maxScore')?.value ?? 100" placeholder="e.g. 70"
+              [class.is-invalid]="createForm.get('passingScore')?.invalid && createForm.get('passingScore')?.touched" />
+            @if (createForm.get('passingScore')?.invalid && createForm.get('passingScore')?.touched) {
+              <div class="sf-field-error">Passing Score must be between 1 and 100.</div>
+            }
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <button type="button" class="sf-btn-ghost" (click)="closeCreate()">Cancel</button>
+          <button type="submit" class="sf-btn-primary" [disabled]="createLoading()">
+            @if (createLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            Create
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+}
+
+
+
+<!-- ── Evaluate Result Modal (Trainer) ───────────────────────────────── -->
+@if (showEvalModal() && evalTarget()) {
+<div class="sf-modal-backdrop fade-in" (click)="closeEval()">
+  <div class="sf-modal" style="max-width:460px;" (click)="$event.stopPropagation()">
+    <div class="sf-modal-header">
+      <h5 class="fw-bold mb-0"><i class="bi bi-check2-circle me-2"></i>Evaluate Submission</h5>
+      <button class="sf-btn-ghost" type="button" (click)="closeEval()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="sf-modal-body">
+
+      <!-- Submission summary -->
+      <div class="sf-card mb-4" style="background:var(--sf-bg);">
+        <div class="row g-2">
+          <div class="col-6">
+            <div class="sf-muted small">Employee</div>
+            <div class="fw-semibold">{{ evalTarget()!.employeeName }}</div>
+          </div>
+          <div class="col-6">
+            <div class="sf-muted small">Course</div>
+            <div class="fw-semibold">{{ evalTarget()!.courseName }}</div>
+          </div>
+          <div class="col-4">
+            <div class="sf-muted small">Type</div>
+            <div><span class="sf-chip">{{ evalTarget()!.assessmentType }}</span></div>
+          </div>
+          <div class="col-4">
+            <div class="sf-muted small">Score</div>
+            <div class="fw-bold fs-5"
+              [style.color]="evalTarget()!.score >= evalTarget()!.passingScore ? 'var(--sf-success,#059669)' : 'var(--sf-danger,#dc2626)'">
+              {{ evalTarget()!.score }} / {{ evalTarget()!.maxScore }}
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="sf-muted small">Pass Mark</div>
+            <div class="fw-semibold">{{ evalTarget()!.passingScore }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pass / Fail selector -->
+      <p class="sf-label mb-2">Your Verdict <span class="text-danger">*</span></p>
+      <div class="d-flex gap-3 mb-4">
+        <button type="button" class="sf-btn-outline flex-fill py-3"
+          [style.border-color]="evalVerdict() === 'Pass' ? 'var(--sf-success,#059669)' : ''"
+          [style.color]="evalVerdict() === 'Pass' ? 'var(--sf-success,#059669)' : ''"
+          [style.background]="evalVerdict() === 'Pass' ? '#d1fae5' : ''"
+          (click)="evalVerdict.set('Pass')">
+          <i class="bi bi-check-circle-fill me-2"></i>Pass
+        </button>
+        <button type="button" class="sf-btn-outline flex-fill py-3"
+          [style.border-color]="evalVerdict() === 'Fail' ? 'var(--sf-danger,#dc2626)' : ''"
+          [style.color]="evalVerdict() === 'Fail' ? 'var(--sf-danger,#dc2626)' : ''"
+          [style.background]="evalVerdict() === 'Fail' ? '#fee2e2' : ''"
+          (click)="evalVerdict.set('Fail')">
+          <i class="bi bi-x-circle-fill me-2"></i>Fail
+        </button>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="sf-btn-ghost" (click)="closeEval()">Cancel</button>
+        <button type="button" class="sf-btn-primary"
+          [disabled]="evalSubmitting() || !evalVerdict()"
+          (click)="submitEval()">
+          @if (evalSubmitting()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Submit Verdict
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+}
+
+
+<!-- (Issue Certification modal removed — certificates are auto-issued on
+     course completion. No manual issuance UI any more.) -->

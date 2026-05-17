@@ -1,0 +1,129 @@
+# ══════════════════════════════════════════════
+#  .NET / C# / Entity Framework .gitignore
+# ══════════════════════════════════════════════
+
+# ── Build outputs ──
+Migrations/
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+build/
+out/
+
+# ── Compiled files ──
+*.dll
+*.exe
+*.obj
+*.pdb
+*.cache
+*.ilk
+*.lib
+*.exp
+*.suo
+*.user
+*.log
+
+# ── NuGet packages ──
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+**/packages/*
+
+# ── Visual Studio files ──
+.vs/
+*.sql
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vspscc
+*.vssscc
+*.pidb
+*.svclog
+*.scc
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+launchSettings.json
+
+# ── Visual Studio Code ──
+.vscode/
+
+# Migrations
+Skillforge.Databases/Skillforge.Data/Migrations/
+
+# ── JetBrains Rider ──
+.idea/
+*.sln.iml
+
+# ── User-specific files ──
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ── Publish output ──
+publish/
+*.publish.xml
+
+# ── Entity Framework ──
+*.mdf
+*.ldf
+*.db
+*.db-shm
+*.db-wal
+
+# ── appsettings and secrets ──
+appsettings.Development.json
+appsettings.json
+appsettings.Local.json
+secrets.json
+**/Properties/launchSettings.json
+
+# ── .NET Core / ASP.NET ──
+wwwroot/lib/
+project.lock.json
+ScaffoldingReadMe.txt
+
+# ── dotnet user secrets ──
+**/Properties/serviceDependencies.json
+
+# ── Test results ──
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+coverage/
+*.coverage
+*.coveragexml
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# ── Environment files ──
+.env
+.env.local
+.env.development
+.env.production
+
+# EF Core safe ignores
+efcore.design.*
+**/Migrations/
+
+appsettings.json
+appsettings.*.json
+
+.claude/
